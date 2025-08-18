@@ -1,0 +1,32 @@
+body {
+  background: linear-gradient(
+    0deg,
+    rgba(245, 214, 180, 1) 23%,
+    rgba(0, 122, 255, 1) 50%,
+    rgba(51, 156, 255, 1) 71%,
+    rgba(153, 204, 255, 1) 93%
+  );
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+.glass {
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.sidebar-surface {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+.sidebar-card {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .sidebar-card {
+    width: 18rem;
+  }
+}
+
+main {
+  padding-bottom: 5rem;
+}
