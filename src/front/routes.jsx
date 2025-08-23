@@ -16,6 +16,7 @@ import { ChapterPage } from "./pages/Chapter";
 import { WriterPage } from "./pages/Writer";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -46,6 +47,7 @@ export const router = createBrowserRouter(
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/following" element={<FollowingWritter />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
     </Route>
   )
 >>>>>>> 33baed9e6329573f66f31bdf117c14bbf5dae
