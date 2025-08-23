@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="main.css" />
+    <title>Profile</title>
+  </head>
+  <header>
+    <nav class="navbar navbar-expand-md glass" data-bs-theme="light">
+      <div class="container-fluid">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+          <img
+            src="assets/Isotipo Color (1).png"
+            alt="Logo"
+            style="height: 56px"
+          />
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+          aria-controls="mainNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-md-0"></ul>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary btn-sm" type="button">Write</button>
+
+            <img
+              src="assets/img_avatar.png"
+              class="profile-nav rounded-circle"
+              alt="..."
+              style="height: 40px; width: 40px; object-fit: cover"
+            />
+
+            <div class="dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Caesar
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#">My Profile</a></li>
+                <li><a class="dropdown-item" href="#">Language: English</a></li>
+                <li><a class="dropdown-item" href="#">Log Out</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <body>
+    <div class="p-5 bg-body-tertiary">
+      <div class="container-fluid d-flex flex-column align-items-center py-5">
+        <div>
+          <img
+            src="assets/img_avatar.png"
+            class="profile-page rounded-circle"
+            alt="..."
+            style="width: 120px; height: 120px; object-fit: cover"
+          />
+        </div>
+        <div>
+          <h1 class="mt-3">Caesar</h1>
+        </div>
+        <div class="d-flex">
+          <p class="text-secondary me-2">#Stories</p>
+          <p class="text-secondary">#Followers</p>
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid d-flex gap-3 bg-white py-2">
+      <div>
+        <button class="btn btn-primary" type="button">About</button>
+      </div>
+      <div>
+        <button class="btn btn-primary">Following</button>
+      </div>
+      <div class="ms-auto">
+        <button class="btn btn-primary">Edit Profile</button>
+      </div>
+    </div>
+<div class="d-flex gap-4">
+  <div class="bg-white my-4 p-3 rounded shadow">
+    <p>Description</p>
+    <p>Location</p>
+    <p>Joined at</p>
+    <hr class="my-3" />
+    <h4>Share Profile</h4>
+    <div class="d-flex gap-3">
+      <i class="fa-brands fa-twitter" style="font-size: 30px"></i>
+      <i class="fa-brands fa-facebook" style="font-size: 30px"></i>
+      <i class="fa-brands fa-instagram" style="font-size: 30px"></i>
+      <i class="fa-solid fa-envelope" style="font-size: 30px"></i>
+    </div>
+  </div>
+
+<div class="bg-white my-4 p-3 rounded shadow mx-auto" style="max-width: 1200px;">
+  <h1 class="mb-4">Stories</h1>
+
+  <div class="d-flex flex-wrap gap-4">
+    <div class="d-flex bg-light rounded shadow-sm p-2" style="width: 350px;">
+      <div style="flex: 0 0 120px;">
+        <img
+          src="assets/lyrierria-326341252-992247788403253-8048664342800772361-n.jpg"
+          class="img-fluid rounded"
+          alt="cover"
+        />
+      </div>
+      <div class="ps-2">
+        <h5 class="card-title mb-1">Dragon Story</h5>
+        <p class="card-text small">Sinopsis 150 - 200 characters</p>
+        <p class="mb-1 small">#Comments</p>
+        <p class="mb-1 small">#Views</p>
+        <small class="text-body-secondary d-block mb-1">Last updated 3 mins ago</small>
+        <a href="#" class="me-2">Fantasy</a>
+        <a href="#">Medieval</a>
+      </div>
+    </div>
+
+    <div class="d-flex bg-light rounded shadow-sm p-2" style="width: 350px;">
+      <div style="flex: 0 0 120px;">
+        <img
+          src="assets/lyrierria-326341252-992247788403253-8048664342800772361-n.jpg"
+          class="img-fluid rounded"
+          alt="cover"
+        />
+      </div>
+      <div class="ps-2">
+        <h5 class="card-title mb-1">Dragon Story</h5>
+        <p class="card-text small">Sinopsis 150 - 200 characters</p>
+        <p class="mb-1 small">#Comments</p>
+        <p class="mb-1 small">#Views</p>
+        <small class="text-body-secondary d-block mb-1">Last updated 3 mins ago</small>
+        <a href="#" class="me-2">Fantasy</a>
+        <a href="#">Medieval</a>
+      </div>
+    </div>
+    <div class="d-flex bg-light rounded shadow-sm p-2" style="width: 350px;">
+      <div style="flex: 0 0 120px;">
+        <img
+          src="assets/lyrierria-326341252-992247788403253-8048664342800772361-n.jpg"
+          class="img-fluid rounded"
+          alt="cover"
+        />
+      </div>
+      <div class="ps-2">
+        <h5 class="card-title mb-1">Dragon Story</h5>
+        <p class="card-text small">Sinopsis 150 - 200 characters</p>
+        <p class="mb-1 small">#Comments</p>
+        <p class="mb-1 small">#Views</p>
+        <small class="text-body-secondary d-block mb-1">Last updated 3 mins ago</small>
+        <a href="#" class="me-2">Fantasy</a>
+        <a href="#">Medieval</a>
+      </div>
+    </div>
+  </div>
+</div>
+  </body>
+</html>
