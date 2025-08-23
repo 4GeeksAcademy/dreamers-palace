@@ -1,27 +1,34 @@
 // Import necessary components and functions from react-router-dom.
 
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { WelcomePage } from "./components/welcomePage";
+import { TimelinePage } from "./pages/Timeline";
+import { StoryPage } from "./pages/Story";
+import { ChapterPage } from "./pages/Chapter";
+import { WriterPage } from "./pages/Writer";
+import { FollowingWritter } from "./pages/Following";
+import { LoginPage } from "./pages/LoginPage";
 
 export const router = createBrowserRouter(
-    createRoutesFromElements(
+  createRoutesFromElements(
     // CreateRoutesFromElements function allows you to build route elements declaratively.
     // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
     // Root, on the contrary, create a sister Route, if you have doubts, try it!
     // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
     // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
 
-      // Root Route: All navigation will start from here.
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+    // Root Route: All navigation will start from here.
+    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
+<<<<<<< HEAD
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path= "/" element={<Home />} />
         <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
@@ -29,4 +36,17 @@ export const router = createBrowserRouter(
         <Route path="/welcomePage" element={<WelcomePage />} />
       </Route>
     )
+      {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
+      <Route path="/" element={<Home />} />
+      <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
+      <Route path="/demo" element={<Demo />} />
+      <Route path="/timeline" element={<TimelinePage />} />
+      <Route path="/story" element={<StoryPage />} />
+      <Route path="/chapter" element={<ChapterPage />} />
+      <Route path="/writerpage" element={<WriterPage />} />
+      <Route path="/following" element={<FollowingWritter />} />
+      <Route path="/login" element={<LoginPage />} />
+    </Route>
+  )
+>>>>>>> 33baed9e6329573f66f31bdf117c14bbf5dae
 );
