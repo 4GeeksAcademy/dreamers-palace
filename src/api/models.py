@@ -24,7 +24,7 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     display_name:Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
-    user_role: Mapped[UserRole] = mapped_column(db.Enum(UserRole, name="user_role"), nullable=False, default=UserRole.READER, server_default="reader")
+    user_role: Mapped[UserRole] = mapped_column(db.Enum(UserRole, name="user_role", native_enum=False, create_constraint=True),nullable=False, default=UserRole.READER, server_default="reader")
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
