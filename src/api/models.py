@@ -31,6 +31,8 @@ class User(db.Model):
     
     stories: Mapped[List["Story"]] = relationship(back_populates="author", cascade="all")
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")
+    followers: Mapped[List["Follower"]] = relationship(back_populates="following", foreign_keys="Follower.following_id",cascade="all")
+    following: Mapped[List["Follower"]] = relationship(back_populates="follower",foreign_keys="Follower.follower_id",cascade="all")
 
 
     def serialize(self):
@@ -56,7 +58,7 @@ class Story(db.Model):
 
     author: Mapped[User] = relationship(back_populates="stories")
     chapters: Mapped[List["Chapter"]] = relationship(back_populates="story", cascade="all", order_by="Chapter.number")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="story", foreign_keys="Comment.story_id"
+    comments: Mapped[List["Comment"]] = relationship(back_populates="story", foreign_keys="Comment.story_id")
 
     def serialize(self):
         return {
@@ -102,11 +104,29 @@ class Chapter(db.Model):
 
 class Comment(db.Model): 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[User] = mapped_column(db.ForeingKey("user.id", ondelete="CASCADE"), nullable=False)
-    story_id: Mapped[Story] = mapped_column(db.ForeignKey("story.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    story_id: Mapped[int] = mapped_column(db.ForeignKey("story.id", ondelete="CASCADE"), nullable=False)
     text: Mapped[str] = mapped_column(String(280), nullable=False)
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True), nullable=False))
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
+
     user: Mapped["User"] = relationship(back_populates="comments")
     story: Mapped[Optional["Story"]] = relationship(back_populates="comments")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "created_at": _iso(self.created_at), 
+            "updated_at": _iso(self.updated_at),
+            "deleted_at": self.deleted_at
+        }
+    
+class Follower(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    follower_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    following_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+
+    follower: Mapped["User"] = relationship(back_populates="following", foreign_keys=[follower_id])
+    following: Mapped["User"] = relationship(back_populates="follower", foreign_keys=[following_id])
