@@ -86,7 +86,6 @@ class Chapter(db.Model):
     deleted_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
 
     story: Mapped[Story] = relationship(back_populates="chapters")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="chapter", foreign_keys="Comment.chapter_id")
 
     def serialize(self):
         return {
@@ -131,7 +130,7 @@ class Follower(db.Model):
     following_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
 
     follower: Mapped["User"] = relationship(back_populates="following", foreign_keys=[follower_id])
-    following: Mapped["User"] = relationship(back_populates="follower", foreign_keys=[following_id])
+    following: Mapped["User"] = relationship(back_populates="followers", foreign_keys=[following_id])
 
     def serialize(self):
         return {
