@@ -1,5 +1,4 @@
 // Import necessary components and functions from react-router-dom.
-
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -16,7 +15,6 @@ import { ChapterPage } from "./pages/Chapter";
 import { WriterPage } from "./pages/Writer";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,28 +25,18 @@ export const router = createBrowserRouter(
     // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
 
     // Root Route: All navigation will start from here.
-    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
-
-<<<<<<< HEAD
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
-        <Route path="/demo" element={<Demo />} />
-        <Route path="/welcomePage" element={<WelcomePage />} />
-      </Route>
-    )
-      {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
+    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
+      {/* Nested Routes: Defines sub-routes within the Layout component. */}
       <Route path="/" element={<Home />} />
       <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
       <Route path="/demo" element={<Demo />} />
+      <Route path="/welcomePage" element={<WelcomePage />} />
       <Route path="/timeline" element={<TimelinePage />} />
       <Route path="/story" element={<StoryPage />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/following" element={<FollowingWritter />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
     </Route>
   )
->>>>>>> 33baed9e6329573f66f31bdf117c14bbf5dae
 );
