@@ -117,6 +117,8 @@ class Comment(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "user_id": self.user_id,
+            "story_id": self.story_id,
             "text": self.text,
             "created_at": _iso(self.created_at), 
             "updated_at": _iso(self.updated_at),
@@ -130,3 +132,10 @@ class Follower(db.Model):
 
     follower: Mapped["User"] = relationship(back_populates="following", foreign_keys=[follower_id])
     following: Mapped["User"] = relationship(back_populates="follower", foreign_keys=[following_id])
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "follower_id": self.follower_id,
+            "following_id": self.following_id, 
+        }
