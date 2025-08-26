@@ -8,13 +8,16 @@ import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
-import { WelcomePage } from "./components/welcomePage";
+import { Welcome } from "./pages/Welcome";
 import { TimelinePage } from "./pages/Timeline";
 import { StoryPage } from "./pages/Story";
 import { ChapterPage } from "./pages/Chapter";
 import { WriterPage } from "./pages/Writer";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { Recovery } from "./components/Recovery";
+import { RecoveryPage } from "./pages/RecoveryPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,13 +33,15 @@ export const router = createBrowserRouter(
       <Route path="/" element={<Home />} />
       <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
       <Route path="/demo" element={<Demo />} />
-      <Route path="/welcomePage" element={<WelcomePage />} />
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="/timeline" element={<TimelinePage />} />
       <Route path="/story" element={<StoryPage />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/following" element={<FollowingWritter />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/recovery" element={<RecoveryPage />} />
     </Route>
   )
 );

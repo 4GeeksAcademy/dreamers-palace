@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export const welcomePage = () => {
+export const WelcomePage = () => {
     return (<>
 
         <div className="content d-flex justify-content-center my-4">
@@ -62,7 +62,7 @@ export const welcomePage = () => {
         </div>
 
         <div className="demo-content">
-            <div className="container-fluid" style="padding-top: 20px;">
+            <div className="container-fluid" style={{paddingTop: "20px"}}>
                 <div className="row">
                     <div className="col-12">
 
@@ -145,10 +145,10 @@ export const welcomePage = () => {
                                     <div className="quote-section p-4">
                                         <h4 className="section-title mb-3">📖 Cita del Día</h4>
                                         <blockquote className="blockquote text-center mb-0">
-                                            <p className="mb-3" style="font-family: 'Crimson Text', serif; font-style: italic; font-size: 1.2rem; color: #000000;">
+                                            <p className="mb-3" style={{fontFamily: "Crimson Text, serif", fontStyle: "italic", fontSize: "1.2rem", color: "#000000"}}>
                                                 "Los libros son espejos: solo se ve en ellos lo que uno ya lleva dentro."
                                             </p>
-                                            <footer className="blockquote-footer" style="color: #333333;">
+                                            <footer className="blockquote-footer" style={{color: "#333333"}}>
                                                 Carlos Ruiz Zafón
                                             </footer>
                                         </blockquote>
@@ -159,8 +159,8 @@ export const welcomePage = () => {
                     </div>
                 </div>
             </div>
-         </div>
-        </>
+        </div>
+    </>
 
-        )
+    )
 }
