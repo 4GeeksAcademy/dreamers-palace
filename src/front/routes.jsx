@@ -18,6 +18,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { Recovery } from "./components/Recovery";
 import { RecoveryPage } from "./pages/RecoveryPage";
+import { VisitorPage } from "./pages/VisitorPage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,6 +43,7 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/recovery" element={<RecoveryPage />} />
+      <Route path="/visitor" element={<VisitorPage />} />
     </Route>
   )
 );
