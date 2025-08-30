@@ -40,9 +40,11 @@ class User(db.Model):
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
     stories: Mapped[List["Story"]] = relationship(back_populates="author", cascade="all")
+    story_views: Mapped[List["StoryView"]] = relationship(back_populates="user", cascade="all")
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")
     followers: Mapped[List["Follower"]] = relationship(back_populates="following", foreign_keys="Follower.following_id",cascade="all")
     following: Mapped[List["Follower"]] = relationship(back_populates="follower",foreign_keys="Follower.follower_id",cascade="all")
+    
 
 
     def serialize(self):
@@ -68,6 +70,7 @@ class Story(db.Model):
 
     author: Mapped[User] = relationship(back_populates="stories")
     chapters: Mapped[List["Chapter"]] = relationship(back_populates="story", cascade="all", order_by="Chapter.number")
+    views: Mapped[List["StoryView"]] = relationship(back_populates="story", cascade="all")
     comments: Mapped[List["Comment"]] = relationship(back_populates="story", foreign_keys="Comment.story_id")
 
     def serialize(self):
@@ -110,6 +113,25 @@ class Chapter(db.Model):
             "updated_at": _iso(self.updated_at),
             "deleted_at": _iso(self.deleted_at)
         }
+    
+class StoryView(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    story_id: Mapped[int] = mapped_column(db.ForeignKey("story.id", ondelete="CASCADE"), nullable=False)
+    view_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+
+    user: Mapped["User"] = relationship(back_populates="story_views")
+    story: Mapped["Story"] = relationship(back_populates="views")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "story_id": self.story_id,
+            "view_count": self.view_count
+        }
+
+
 
 class Comment(db.Model): 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from sqlalchemy import func
-from api.models import db, User, Story, Chapter, Comment, Follower, UserRole, StoryStatus, ChapterStatus
+from api.models import db, User, Story, Chapter, Comment, Follower, UserRole, StoryStatus, ChapterStatus, StoryView
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
@@ -123,7 +123,7 @@ def update_story(story_id:int):
         return jsonify({"error": "forbidden"}), 403 
 
     data = request.get_json() or {}
-    for field in ("title", "synopsis", "status"):
+    for field in ("title", "synopsis"):
         if field in data and data[field] is not None: 
             setattr(stories_update, field, data[field])
 
@@ -205,6 +205,32 @@ def delete_chapter(story_id: int, chapter_id: int):
 def list_chapters(story_id: int):
     items = Chapter.query.filter_by(story_id=story_id).order_by(Chapter.number.asc()).all()
     return jsonify([c.serialize() for c in items])
+
+@api.route("/user/me/recent-stories", methods=["GET"])
+@jwt_required()
+def recent_stories():
+    user = get_current_user()
+    viewed = (StoryView.query.filter_by(user_id=user.id).order_by(StoryView.last_viewed_at.desc()).limit(5))
+    return jsonify([sv.serialize() for sv in viewed.all()]), 200
+
+@api.route("/stories/<int:story_id>/view", methods=["POST"])
+@jwt_required()
+def mark_view(story_id: int):
+    user = get_current_user()
+    viewed = db.session.get(Story, story_id)
+    if not viewed:
+        return jsonify({"error": "not_found"}), 404
+
+    sv = StoryView.query.filter_by(user_id=user.id, story_id=story_id).first()
+    if sv:
+        sv.last_viewed_at = func.now()
+        sv.view_count = sv.view_count + 1
+    else:
+        sv = StoryView(user_id=user.id, story_id=story_id)
+        db.session.add(sv)
+
+    db.session.commit()
+    return jsonify(sv.serialize()), 200
 
 @api.route("/comments", methods=["POST"])
 @jwt_required()
