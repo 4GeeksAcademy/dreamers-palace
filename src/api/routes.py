@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from sqlalchemy import func
-from api.models import db, User, Story, Chapter, Comment, Follower, UserRole
+from api.models import db, User, Story, Chapter, Comment, Follower, UserRole, StoryStatus, ChapterStatus
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
@@ -89,7 +89,7 @@ def create_story():
     if not title: 
         return jsonify({"error": "title_required"}), 400
     
-    new_story = Story(author_id=user.id, title=title, synopsis=synopsis, status="draft")
+    new_story = Story(author_id=user.id, title=title, synopsis=synopsis)
     db.session.add(new_story)
     db.session.commit()
     return jsonify(new_story.serialize()), 201
@@ -98,7 +98,7 @@ def create_story():
 def list_stories():
     page = max(int(request.args.get("page", 1)), 1)
     per_page = min(max(int(request.args.get("per_page", 10)), 1), 50)
-    list_order = Story.query.order_by(Story.published_at.desc().nullslast(), Story.id.desc())
+    list_order = Story.query.order_by(Story.published_at.desc().nulls_last(), Story.id.desc())
     pag = list_order.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify({
@@ -126,6 +126,25 @@ def update_story(story_id:int):
     for field in ("title", "synopsis", "status"):
         if field in data and data[field] is not None: 
             setattr(stories_update, field, data[field])
+
+    if "status" in data and data["status"] is not None:
+        try:
+            new_status = StoryStatus(data["status"])
+        except ValueError:
+            return jsonify({"error": "invalid_status"}), 422
+
+        old_status = stories_update.status
+        stories_update.status = new_status
+
+        if old_status != StoryStatus.PUBLISHED and new_status == StoryStatus.PUBLISHED:
+            stories_update.published_at = func.now()
+        elif new_status != StoryStatus.PUBLISHED:
+            stories_update.published_at = None
+
+        if new_status == StoryStatus.DELETED:
+            stories_update.deleted_at = func.now()
+        else:
+            stories_update.deleted_at = None
     
     db.session.commit()
     return jsonify(stories_update.serialize()), 200
@@ -143,11 +162,19 @@ def create_chapter(story_id:int):
     title = (data.get("title") or "").strip()
     number = data.get("number")
     content = (data.get("content") or "").strip()
-    status = data.get("status", "draft")
+    status = data.get("status")
     if not title or not number or not content: 
         return jsonify({"error": "missing_fields"}), 400
     
-    new_chapter = Chapter(story_id=story_id, title=title, number=int(number), content=content, status=status)
+    if status is None: 
+        new_status= ChapterStatus.DRAFT
+    else:
+        try:
+            new_status = ChapterStatus(status)
+        except ValueError: 
+            return jsonify({"error": "invalid_status"}), 422
+        
+    new_chapter = Chapter(story_id=story_id, title=title, number=int(number), content=content, status=new_status)
     db.session.add(new_chapter)
     db.session.commit()
     return jsonify(new_chapter.serialize()), 201
@@ -169,7 +196,7 @@ def delete_chapter(story_id: int, chapter_id: int):
         db.session.delete(chapter_delete)
     else:
         chapter_delete.deleted_at = func.now()
-        chapter_delete.status = "hidden"
+        chapter_delete.status = ChapterStatus.DELETED
 
     db.session.commit()
     return "", 204
@@ -205,6 +232,23 @@ def list_comments():
         comment_list = comment_list.filter_by(story_id=story_id)
     comment_list = comment_list.order_by(Comment.created_at.desc())
     return jsonify([c.serialize() for c in comment_list.limit(100).all()])
+
+
+@api.route("/follows", methods=["GET"])
+def list_follows():
+    following_id = request.args.get("following_id", type=int)
+    follower_id = request.args.get("follower_id", type=int)
+
+    q = Follower.query
+    if following_id is not None:
+        q = q.filter_by(following_id=following_id)
+    if follower_id is not None:
+        q = q.filter_by(follower_id=follower_id)
+
+    q = q.order_by(Follower.id.desc()) 
+    items = q.limit(100).all()
+
+    return jsonify([f.serialize() for f in items]), 200
 
 @api.route("/follows", methods=["POST"])
 @jwt_required()

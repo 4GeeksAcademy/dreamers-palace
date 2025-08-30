@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, Text
+from sqlalchemy import String, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
@@ -18,6 +18,16 @@ class UserRole(PyEnum):
     READER = "reader" 
     WRITER = "writer"
     ADMIN = "admin"
+
+class StoryStatus(PyEnum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    DELETED = "deleted"
+
+class ChapterStatus(PyEnum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    DELETED = "deleted"
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -50,7 +60,7 @@ class Story(db.Model):
     author_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     synopsis: Mapped[str] = mapped_column(String(200), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", server_default="draft")
+    status: Mapped[StoryStatus] = mapped_column(db.Enum(StoryStatus, name="story_status", native_enum=False, create_constraint=True), nullable=False, default=StoryStatus.DRAFT, server_default="draft")
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -66,11 +76,11 @@ class Story(db.Model):
             "author_id": self.author_id,
             "title": self.title, 
             "synopsis": self.synopsis,
-            "status": self.status, 
+            "status": self.status.value, 
             "published_at": self.published_at, 
             "created_at": _iso(self.created_at), 
             "updated_at": _iso(self.updated_at),
-            "deleted_at": self.deleted_at
+            "deleted_at": _iso(self.deleted_at)
         }
 
 class Chapter(db.Model): 
@@ -79,7 +89,7 @@ class Chapter(db.Model):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(String(600), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", server_default="draft")
+    status: Mapped[ChapterStatus] = mapped_column(db.Enum(ChapterStatus, name="chapter_status", native_enum=False, create_constraint=True), nullable=False, default=ChapterStatus.DRAFT, server_default="draft")
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -94,11 +104,11 @@ class Chapter(db.Model):
             "title": self.title, 
             "number": self.number, 
             "content": self.content,
-            "status": self.status, 
-            "published_at": self.published_at, 
+            "status": self.status.value, 
+            "published_at": _iso(self.published_at), 
             "created_at": _iso(self.created_at), 
             "updated_at": _iso(self.updated_at),
-            "deleted_at": self.deleted_at
+            "deleted_at": _iso(self.deleted_at)
         }
 
 class Comment(db.Model): 
@@ -121,7 +131,7 @@ class Comment(db.Model):
             "text": self.text,
             "created_at": _iso(self.created_at), 
             "updated_at": _iso(self.updated_at),
-            "deleted_at": self.deleted_at
+            "deleted_at": _iso(self.deleted_at)
         }
     
 class Follower(db.Model):
