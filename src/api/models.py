@@ -15,26 +15,26 @@ def _iso(dt):
     return dt and dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 class UserRole(PyEnum):
-    READER = "reader" 
-    WRITER = "writer"
-    ADMIN = "admin"
+    READER = "READER"
+    WRITER = "WRITER"
+    ADMIN = "ADMIN"
 
 class StoryStatus(PyEnum):
-    DRAFT = "draft"
-    PUBLISHED = "published"
-    DELETED = "deleted"
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    DELETED = "DELETED"
 
 class ChapterStatus(PyEnum):
-    DRAFT = "draft"
-    PUBLISHED = "published"
-    DELETED = "deleted"
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    DELETED = "DELETED"
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     display_name:Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
-    user_role: Mapped[UserRole] = mapped_column(db.Enum(UserRole, name="user_role", native_enum=False, create_constraint=True),nullable=False, default=UserRole.READER, server_default="reader")
+    user_role: Mapped[UserRole] = mapped_column(db.Enum(UserRole, name="user_role", native_enum=False, create_constraint=True, validate_strings=True),nullable=False, default=UserRole.READER, server_default=UserRole.READER.value)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -62,7 +62,7 @@ class Story(db.Model):
     author_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     synopsis: Mapped[str] = mapped_column(String(200), nullable=False)
-    status: Mapped[StoryStatus] = mapped_column(db.Enum(StoryStatus, name="story_status", native_enum=False, create_constraint=True), nullable=False, default=StoryStatus.DRAFT, server_default="draft")
+    status: Mapped[StoryStatus] = mapped_column(db.Enum(StoryStatus, name="story_status", native_enum=False, create_constraint=True, validate_strings=True), nullable=False, default=StoryStatus.DRAFT, server_default=StoryStatus.DRAFT.value)
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -80,7 +80,7 @@ class Story(db.Model):
             "title": self.title, 
             "synopsis": self.synopsis,
             "status": self.status.value, 
-            "published_at": self.published_at, 
+            "published_at": _iso(self.published_at), 
             "created_at": _iso(self.created_at), 
             "updated_at": _iso(self.updated_at),
             "deleted_at": _iso(self.deleted_at)
@@ -92,7 +92,7 @@ class Chapter(db.Model):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(String(600), nullable=False)
-    status: Mapped[ChapterStatus] = mapped_column(db.Enum(ChapterStatus, name="chapter_status", native_enum=False, create_constraint=True), nullable=False, default=ChapterStatus.DRAFT, server_default="draft")
+    status: Mapped[ChapterStatus] = mapped_column(db.Enum(ChapterStatus, name="chapter_status", native_enum=False, create_constraint=True, validate_strings=True), nullable=False, default=ChapterStatus.DRAFT, server_default=ChapterStatus.DRAFT.value)
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -120,6 +120,7 @@ class StoryView(db.Model):
     story_id: Mapped[int] = mapped_column(db.ForeignKey("story.id", ondelete="CASCADE"), nullable=False)
     view_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
 
+    last_viewed_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     user: Mapped["User"] = relationship(back_populates="story_views")
     story: Mapped["Story"] = relationship(back_populates="views")
 

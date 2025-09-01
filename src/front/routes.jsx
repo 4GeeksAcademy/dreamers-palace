@@ -11,6 +11,7 @@ import { Demo } from "./pages/Demo";
 import { Welcome } from "./pages/Welcome";
 import { TimelinePage } from "./pages/Timeline";
 import { StoryPage } from "./pages/Story";
+import { StoryCreation } from "./components/StoryCreation";
 import { ChapterPage } from "./pages/Chapter";
 import { WriterPage } from "./pages/Writer";
 import { FollowingWritter } from "./pages/Following";
@@ -36,6 +37,8 @@ export const router = createBrowserRouter(
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/timeline" element={<TimelinePage />} />
       <Route path="/story" element={<StoryPage />} />
+      <Route path="/story/new" element={<StoryCreation />} />
+      <Route path="/story/:id" element={<StoryPage />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/following" element={<FollowingWritter />} />
