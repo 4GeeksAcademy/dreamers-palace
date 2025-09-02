@@ -54,7 +54,6 @@ export const Timeline = () => {
             <div className="card my-3 sidebar-card">
               <div className="card-body">
                 <h5 className="card-title">Recently Viewed</h5>
-                {/* fix de clase: list-unstyled */}
                 <ul className="list-unstyled mb-0">
                   <li>Story 1</li>
                   <li>Story 2</li>
@@ -131,7 +130,6 @@ export const Timeline = () => {
                                 Last updated {s.updated_at}
                               </small>
                             </p>
-                            {/* tags opcionales si vienen del backend */}
                             {Array.isArray(s.tags) &&
                               s.tags.map((t) => (
                                 <Link
