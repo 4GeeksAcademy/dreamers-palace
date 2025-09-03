@@ -58,6 +58,7 @@ export const Register = () =>{
 
       if (data.user) localStorage.setItem("user", JSON.stringify(data.user))
 
+      window.dispatchEvent(new Event("auth-changed"));
       navigate("/timeline");
     } catch (e) {
       setErr(String(e.message || e));
@@ -65,7 +66,6 @@ export const Register = () =>{
       setSubmitting(false);
     }
   };
-
 
   return (
     <main className="d-flex flex-column justify-content-center align-items-center min-vh-90 mt-5">

@@ -41,6 +41,7 @@ export const Login = () =>{
       localStorage.setItem("token", data.access_token)
       if (data.user) localStorage.setItem("user", JSON.stringify(data.user))
       
+      window.dispatchEvent(new Event("auth-changed"));
       navigate("/timeline")
     } catch (e) {
       setErr(String(e.message || e))
