@@ -98,7 +98,13 @@ def create_story():
 def list_stories():
     page = max(int(request.args.get("page", 1)), 1)
     per_page = min(max(int(request.args.get("per_page", 10)), 1), 50)
-    list_order = Story.query.order_by(Story.published_at.desc().nulls_last(), Story.id.desc())
+    author_id = request.args.get("author_id", type=int) 
+
+    list_query = Story.query
+    if author_id is not None:
+        list_query = list_query.filter_by(author_id=author_id)
+
+    list_order = list_query.order_by(Story.published_at.desc().nulls_last(), Story.id.desc())
     pag = list_order.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify({
