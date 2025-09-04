@@ -23,7 +23,7 @@ export const Timeline = () => {
         }
         if (!ct.includes("application/json")) {
           const text = await resp.text();
-          throw new Error(`Respuesta no-JSON (${ct}). Inicio: ${text.slice(0,120)}`);
+          throw new Error(`Non JSON response(${ct}). Start: ${text.slice(0,120)}`);
         }
 
         const raw = await resp.json();
@@ -35,7 +35,7 @@ export const Timeline = () => {
           raw?.items ||
           [];
 
-        if (!Array.isArray(list)) throw new Error("La respuesta no es una lista.");
+        if (!Array.isArray(list)) throw new Error("Answer is not a list");
         setStories(list);
       } catch (e) {
         setErr(String(e.message || e));
@@ -77,17 +77,17 @@ export const Timeline = () => {
           <section className="col-12 col-md-9 col-lg-10">
             <div className="bg-white rounded-3 p-3">
               {loading && (
-                <div className="text-center py-5">Cargando historias…</div>
+                <div className="text-center py-5">Loading stories</div>
               )}
               {err && (
                 <div className="alert alert-danger" role="alert">
-                  Error cargando historias: {err}
+                  Error loading stories {err}
                 </div>
               )}
 
               {!loading && !err && stories.length === 0 && (
                 <div className="text-center text-muted py-5">
-                  No hay historias publicadas todavía.
+                  There are no published stories yet
                 </div>
               )}
 
@@ -130,16 +130,16 @@ export const Timeline = () => {
                                 Last updated {s.updated_at}
                               </small>
                             </p>
-                            {Array.isArray(s.tags) &&
-                              s.tags.map((t) => (
-                                <Link
-                                  key={t}
-                                  to={`/tag/${encodeURIComponent(t)}`}
-                                  className="me-2"
-                                >
-                                  {t}
+                            {Array.isArray(s.tags) && s.tags.map((t) => {
+                              const tagId = t?.id ?? t?.slug ?? String(t);               
+                              const tagName = t?.name ?? String(t);                       
+                              const tagSlug = t?.slug ?? encodeURIComponent(String(t));    
+                              return (
+                                <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2">
+                                  {tagName}
                                 </Link>
-                              ))}
+                              );
+                            })}
                           </div>
                         </div>
                       </div>

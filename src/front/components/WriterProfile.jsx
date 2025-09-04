@@ -176,9 +176,16 @@ export const WriterProfile = () => {
                   </h5>
                   <p className="card-text small mb-1">{s.synopsis || "Sinopsis no disponible."}</p>
                   <small className="text-body-secondary d-block mb-1">Last updated {s.updated_at}</small>
-                  {Array.isArray(s.tags) && s.tags.map(t => (
-                    <Link key={t} to={`/tag/${encodeURIComponent(t)}`} className="me-2 small">{t}</Link>
-                  ))}
+                  {Array.isArray(s.tags) && s.tags.map((t) => {
+                    const tagId = t?.id ?? t?.slug ?? String(t);                
+                    const tagName = t?.name ?? String(t);                        
+                    const tagSlug = t?.slug ?? encodeURIComponent(String(t));    
+                    return (
+                      <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2">
+                        {tagName}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             );
