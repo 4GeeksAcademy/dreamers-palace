@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = (import.meta.env.VITE_BACKEND_URL || "")
+const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
 const authHeader = () => {
   const jwttoken = localStorage.getItem("token");
@@ -20,12 +20,12 @@ async function jsonFetch(path, opts = {}) {
   const ct = resp.headers.get("content-type") || "";
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");
-    if (resp.status === 401) throw new Error("No autorizado. Inicia sesión.");
+    if (resp.status === 401) throw new Error("Unauthorized, please log in");
     throw new Error(`HTTP ${resp.status} — ${text.slice(0, 160)}`);
   }
   if (!ct.includes("application/json")) {
     const text = await resp.text().catch(() => "");
-    throw new Error(`Respuesta no-JSON (${ct}). Inicio: ${text.slice(0, 160)}`);
+    throw new Error(`Non JSON response (${ct}). Inicio: ${text.slice(0, 160)}`);
   }
   return resp.json();
 }
@@ -52,9 +52,26 @@ export const StoryCreation = () => {
   const [title, setTitle] = useState("");
   const [synopsis, setSynopsis] = useState("");
   const [visibility, setVisibility] = useState("draft");
+
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await jsonFetch(`/api/categories`);
+        const list = Array.isArray(data) ? data : [];
+        setCategories(list);
+      } catch (e) {
+        setErr(prev => prev || String(e.message || e));
+      }
+    })();
+  }, []);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -62,13 +79,24 @@ export const StoryCreation = () => {
 
     const storytitle = title.trim();
     const storysynopsis = synopsis.trim();
+    const category_id = categoryId ? Number(categoryId) : undefined;
+    const tags =
+      tagsInput
+        .split(",")
+        .map(t => t.trim())
+        .filter(Boolean); 
 
     if (!storytitle) return setErr("Title is required");
     if (storysynopsis.length > 200) return setErr("Synopsis cannot exceed 200 characters");
 
     setSubmitting(true);
     try {
-      const created = await createStory({ title: storytitle, synopsis: storysynopsis });
+      const created = await createStory({
+        title: storytitle,
+        synopsis: storysynopsis,
+        category_id,
+        tags,
+      });
 
       if (visibility === "published") {
         await publishStory(created.id);
@@ -91,7 +119,7 @@ export const StoryCreation = () => {
                 {err && <div className="alert alert-danger mb-3">{err}</div>}
 
                 <div className="row g-3 align-items-center">
-                  <div className="col-12 col-md-8">
+                  <div className="col-12 col-md-6">
                     <label className="form-label">Story title</label>
                     <input
                       type="text"
@@ -102,7 +130,24 @@ export const StoryCreation = () => {
                       required
                     />
                   </div>
-                  <div className="col-12 col-md-4">
+
+                  <div className="col-12 col-md-3">
+                    <label className="form-label">Category</label>
+                    <select
+                      className="form-select"
+                      value={categoryId}
+                      onChange={(e) => setCategoryId(e.target.value)}
+                    >
+                      <option value=""> None </option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-12 col-md-3">
                     <label className="form-label">Visibility</label>
                     <select
                       className="form-select"
@@ -128,6 +173,21 @@ export const StoryCreation = () => {
                   />
                   <div className="form-text">{synopsis.length}/200</div>
                 </div>
+
+                <div className="mt-3">
+                  <label className="form-label">Tags</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. fantasy, medieval, dragons"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                  />
+                  <div className="form-text">
+                    Separa con comas. Ej: <em>fantasy, medieval, dragons</em>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -141,7 +201,7 @@ export const StoryCreation = () => {
                   </button>
                 </div>
                 <div className="form-text mt-2">
-                  Luego agregaremos portada, tags y categoría.
+                  You can choose to publish the story or keep it as a draft.
                 </div>
               </div>
             </div>
