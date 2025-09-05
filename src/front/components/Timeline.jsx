@@ -6,6 +6,7 @@ const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
 export const Timeline = () => {
   const [stories, setStories] = useState([]);
+  const [authorsById, setAuthorsById] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
@@ -44,7 +45,29 @@ export const Timeline = () => {
         setLoading(false);
       }
     };
+
+    // Carga historias
     load();
+
+    // Carga autores (para mostrar display_name del author_id)
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/api/user`, {
+          headers: { Accept: "application/json" },
+        });
+        const ct = r.headers.get("content-type") || "";
+        if (r.ok && ct.includes("application/json")) {
+          const arr = await r.json();
+          const map = {};
+          if (Array.isArray(arr)) {
+            arr.forEach(u => { map[u.id] = u; });
+          }
+          setAuthorsById(map);
+        }
+      } catch {
+        // Silencioso: si falla, mostramos "Unknown author"
+      }
+    })();
   }, []);
 
   const openStory = async (e, s) => {
@@ -54,9 +77,10 @@ export const Timeline = () => {
     try { me = JSON.parse(localStorage.getItem("user") || "null"); } catch {}
 
     if ((me?.user_role === "WRITER" || me?.user_role === "ADMIN") && me?.id === s.author_id) {
-  navigate(`/story/${s.id}`);
-  return;
-}
+      navigate(`/story/${s.id}`);
+      return;
+    }
+
     try {
       const resp = await fetch(`${API_BASE}/api/stories/${s.id}/chapters`, {
         headers: { Accept: "application/json" },
@@ -134,6 +158,8 @@ export const Timeline = () => {
                 !err &&
                 stories.map((s) => {
                   const cover = s.cover_url || examplecover;
+                  const author = authorsById[s.author_id];
+                  const authorName = author?.display_name || "Unknown author";
                   return (
                     <div
                       className="card mb-4 mx-auto"
@@ -150,7 +176,7 @@ export const Timeline = () => {
                         </div>
                         <div className="col-12 col-md-8">
                           <div className="card-body">
-                            <h5 className="card-title">
+                            <h5 className="card-title mb-1">
                               <a
                                 href={`/story/${s.id}`}
                                 className="text-decoration-none"
@@ -159,6 +185,17 @@ export const Timeline = () => {
                                 {s.title}
                               </a>
                             </h5>
+
+                            <div className="text-muted small mb-2">
+                              by{" "}
+                              <Link
+                                to={`/writer?user_id=${s.author_id}`}
+                                className="link-secondary"
+                              >
+                                {authorName}
+                              </Link>
+                            </div>
+
                             <p className="card-text">
                               {s.synopsis || "Synopsis unavailable."}
                             </p>

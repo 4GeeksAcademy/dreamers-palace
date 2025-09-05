@@ -15,6 +15,7 @@ import { StoryCreation } from "./components/StoryCreation";
 import { ChapterCreation } from "./components/ChapterCreation";
 import { ChapterPage } from "./pages/Chapter";
 import { WriterPage } from "./pages/Writer";
+import { WriterProfile } from "./components/WriterProfile";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -38,6 +39,7 @@ export const router = createBrowserRouter(
       <Route path="/story/:id/chapters/:chapterId" element={<ChapterReader />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
+      <Route path="/writer" element={<WriterProfile />} />
       <Route path="/following" element={<FollowingWritter />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
