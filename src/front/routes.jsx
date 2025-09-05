@@ -21,28 +21,21 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { RecoveryPage } from "./pages/RecoveryPage";
 import { VisitorPage } from "./pages/VisitorPage";
 import { StoryWithChapters } from "./components/StoryWithChapters";
+import { ChapterReader } from "./components/ChapterReader";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<LoginPage />} />
       <Route path="/single/:theId" element={<Single />} />
       <Route path="/demo" element={<Demo />} />
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/timeline" element={<TimelinePage />} />
-
-      {/* /story (sin id) sigue yendo a StoryPage si lo necesitas */}
       <Route path="/story" element={<StoryPage />} />
-
-      {/* Crear historia */}
       <Route path="/story/new" element={<StoryCreation />} />
-
-      {/* Detalle de historia + capítulos (solo una vez) */}
       <Route path="/story/:id" element={<StoryWithChapters />} />
-
-      {/* Crear capítulo para una historia */}
       <Route path="/story/:id/chapters/new" element={<ChapterCreation />} />
-
+      <Route path="/story/:id/chapters/:chapterId" element={<ChapterReader />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/following" element={<FollowingWritter />} />

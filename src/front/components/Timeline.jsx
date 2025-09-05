@@ -1,13 +1,14 @@
-import { Link } from "react-router-dom"
 import { useEffect, useState } from "react";
-import examplecover from "../assets/img/dragon_cover.jpg"
+import { Link, useNavigate } from "react-router-dom";
+import examplecover from "../assets/img/dragon_cover.jpg";
 
-const API_BASE = (import.meta.env.VITE_BACKEND_URL || "")
+const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
 export const Timeline = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -15,7 +16,7 @@ export const Timeline = () => {
         const resp = await fetch(`${API_BASE}/api/stories`, {
           headers: { Accept: "application/json" },
         });
-        const ct = resp.headers.get("content-type")
+        const ct = resp.headers.get("content-type");
 
         if (!resp.ok) {
           const text = await resp.text();
@@ -45,7 +46,45 @@ export const Timeline = () => {
     };
     load();
   }, []);
-  
+
+  const openStory = async (e, s) => {
+    e.preventDefault();
+
+    let me = null;
+    try { me = JSON.parse(localStorage.getItem("user") || "null"); } catch {}
+
+    if ((me?.user_role === "WRITER" || me?.user_role === "ADMIN") && me?.id === s.author_id) {
+  navigate(`/story/${s.id}`);
+  return;
+}
+    try {
+      const resp = await fetch(`${API_BASE}/api/stories/${s.id}/chapters`, {
+        headers: { Accept: "application/json" },
+      });
+      const ct = resp.headers.get("content-type") || "";
+      if (!resp.ok) {
+        const text = await resp.text().catch(() => "");
+        throw new Error(`HTTP ${resp.status} — ${text.slice(0,120)}`);
+      }
+      if (!ct.includes("application/json")) {
+        const text = await resp.text().catch(() => "");
+        throw new Error(`Non JSON response (${ct}). Start: ${text.slice(0,120)}`);
+      }
+      const chapters = await resp.json();
+      const published = Array.isArray(chapters)
+        ? (chapters.find(c => c.status === "PUBLISHED") || chapters[0])
+        : null;
+
+      if (published?.id) {
+        navigate(`/story/${s.id}/chapters/${published.id}`);
+      } else {
+        navigate(`/story/${s.id}`);
+      }
+    } catch {
+      navigate(`/story/${s.id}`);
+    }
+  };
+
   return (
     <div>
       <main className="container-fluid">
@@ -112,12 +151,16 @@ export const Timeline = () => {
                         <div className="col-12 col-md-8">
                           <div className="card-body">
                             <h5 className="card-title">
-                              <Link to={`/story/${s.id}`} className="text-decoration-none">
+                              <a
+                                href={`/story/${s.id}`}
+                                className="text-decoration-none"
+                                onClick={(e) => openStory(e, s)}
+                              >
                                 {s.title}
-                              </Link>
+                              </a>
                             </h5>
                             <p className="card-text">
-                              {s.synopsis || "Sinopsis no disponible."}
+                              {s.synopsis || "Synopsis unavailable."}
                             </p>
                             <p className="card-text mb-1">
                               {s.comments_count ?? 0} comments
@@ -131,9 +174,9 @@ export const Timeline = () => {
                               </small>
                             </p>
                             {Array.isArray(s.tags) && s.tags.map((t) => {
-                              const tagId = t?.id ?? t?.slug ?? String(t);               
-                              const tagName = t?.name ?? String(t);                       
-                              const tagSlug = t?.slug ?? encodeURIComponent(String(t));    
+                              const tagId = t?.id ?? t?.slug ?? String(t);
+                              const tagName = t?.name ?? String(t);
+                              const tagSlug = t?.slug ?? encodeURIComponent(String(t));
                               return (
                                 <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2">
                                   {tagName}
