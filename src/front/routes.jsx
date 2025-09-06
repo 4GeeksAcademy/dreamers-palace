@@ -21,13 +21,9 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RecoveryPage } from "./pages/RecoveryPage";
 import { VisitorPage } from "./pages/VisitorPage";
-<<<<<<< HEAD
-import { Libro } from "./pages/Libro";
-import { CapituloO } from "./pages/CapituloO";
-=======
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
->>>>>>> bc147dabddacbc5d22acb69234ec0b3b8d49c73c
+import { Libro } from "./components/Libro";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
