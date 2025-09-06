@@ -365,7 +365,11 @@ def delete_chapter(story_id: int, chapter_id: int):
 
 @api.route("/stories/<int:story_id>/chapters", methods=["GET"])
 def list_chapters(story_id: int):
-    items = Chapter.query.filter_by(story_id=story_id).order_by(Chapter.number.asc()).all()
+    items = (Chapter.query
+             .filter_by(story_id=story_id)
+             .filter(Chapter.deleted_at.is_(None))
+             .order_by(Chapter.number.asc())
+             .all())
     return jsonify([c.serialize() for c in items])
 
 

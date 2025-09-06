@@ -5,6 +5,11 @@ import pfp from "../assets/img/avatar2.png";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
+const authHeader = () => {
+  const t = localStorage.getItem("token");
+  return t ? { Authorization: `Bearer ${t}` } : {};
+};
+
 export const WriterProfile = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -24,12 +29,16 @@ export const WriterProfile = () => {
   const [followersCount, setFollowersCount] = useState(null);
   const [followingCount, setFollowingCount] = useState(null);
   const [err, setErr] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
   useEffect(() => {
     if (!viewUserId) { setLoading(false); return; }
 
     (async () => {
       try {
+        setErr(null);
+
         const resp = await fetch(`${API_BASE}/api/stories?author_id=${viewUserId}`, {
           headers: { Accept: "application/json" },
         });
@@ -80,15 +89,75 @@ export const WriterProfile = () => {
           }
         }
 
+        if (me?.id && me.id !== viewUserId) {
+          const r = await fetch(`${API_BASE}/api/follows?follower_id=${me.id}&following_id=${viewUserId}`, {
+            headers: { Accept: "application/json" },
+          });
+          const ctCheck = r.headers.get("content-type") || "";
+          if (r.ok && ctCheck.includes("application/json")) {
+            const arr = await r.json();
+            setIsFollowing(Array.isArray(arr) && arr.length > 0);
+          }
+        } else {
+          setIsFollowing(false);
+        }
+
       } catch (e) {
         setErr(String(e.message || e));
       } finally {
         setLoading(false);
       }
     })();
-  }, [viewUserId]);
+  }, [viewUserId, me?.id]);
 
   const isOwnProfile = me?.id && me.id === viewUserId;
+
+  async function toggleFollow() {
+    if (!me?.id) {
+      setErr("Debes iniciar sesión para seguir usuarios.");
+      return;
+    }
+    if (isOwnProfile) return; 
+
+    setLoadingFollow(true);
+    setErr(null);
+    try {
+      if (isFollowing) {
+        const r = await fetch(`${API_BASE}/api/follows?following_id=${viewUserId}`, {
+          method: "DELETE",
+          headers: { Accept: "application/json", ...authHeader() },
+        });
+        if (!r.ok) {
+          const t = await r.text().catch(()=> "");
+          throw new Error(`Unfollow failed: HTTP ${r.status} — ${t.slice(0,160)}`);
+        }
+        setIsFollowing(false);
+        setFollowersCount((c) => Math.max(0, (c ?? 0) - 1));
+      } else {
+        const r = await fetch(`${API_BASE}/api/follows`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json", ...authHeader() },
+          body: JSON.stringify({ following_id: viewUserId }),
+        });
+        const ct = r.headers.get("content-type") || "";
+        if (!r.ok) {
+          const t = await r.text().catch(()=> "");
+          throw new Error(`Follow failed: HTTP ${r.status} — ${t.slice(0,160)}`);
+        }
+        if (!ct.includes("application/json")) {
+          const t = await r.text().catch(()=> "");
+          throw new Error(`Follow failed: Non JSON response (${ct}). Start: ${t.slice(0,160)}`);
+        }
+        await r.json();
+        setIsFollowing(true);
+        setFollowersCount((c) => (c ?? 0) + 1);
+      }
+    } catch (e) {
+      setErr(String(e.message || e));
+    } finally {
+      setLoadingFollow(false);
+    }
+  }
 
   return (<>
     <div className="p-5 bg-body-tertiary">
@@ -117,7 +186,21 @@ export const WriterProfile = () => {
       <div>
         <Link to={`/following?user_id=${viewUserId}`} className="btn btn-primary">Following</Link>
       </div>
-      <div className="ms-auto">
+
+      <div className="ms-auto d-flex gap-2">
+        {!isOwnProfile && (
+          me?.id ? (
+            <button
+              className={`btn ${isFollowing ? "btn-outline-danger" : "btn-outline-success"}`}
+              onClick={toggleFollow}
+              disabled={loadingFollow}
+            >
+              {loadingFollow ? "Processing…" : (isFollowing ? "Unfollow" : "Follow")}
+            </button>
+          ) : (
+            <Link to="/login" className="btn btn-outline-primary">Sign in to follow</Link>
+          )
+        )}
         {isOwnProfile && <Link to="/writerpage" className="btn btn-primary">Edit Profile</Link>}
       </div>
     </div>
@@ -167,10 +250,10 @@ export const WriterProfile = () => {
           <div className="bg-white p-3 rounded shadow">
             <h1 className="mb-4">Stories</h1>
 
-            {loading && <div className="text-center text-muted py-4">Cargando…</div>}
+            {loading && <div className="text-center text-muted py-4">Loading....</div>}
 
             {!loading && stories.length === 0 && (
-              <div className="text-center text-muted py-4">Aún no hay historias publicadas.</div>
+              <div className="text-center text-muted py-4">There are no published stories</div>
             )}
 
             <div className="d-flex flex-wrap gap-4">

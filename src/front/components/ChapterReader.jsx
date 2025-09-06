@@ -56,6 +56,7 @@ export const ChapterReader = () => {
         }
         const raw = await cResp.json();
         const list = Array.isArray(raw) ? raw : (raw?.items ?? raw?.data ?? raw?.results ?? []);
+        const activeOnly = list.filter(c => !c.deleted_at);
         if (!Array.isArray(list)) throw new Error("The response is not a list");
 
         const sorted = [...list].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));

@@ -140,10 +140,10 @@ export const WriterFollowing = () => {
         <h1 className="mb-4">Following</h1>
 
         {err && <div className="alert alert-danger">{err}</div>}
-        {loading && <div className="text-center text-muted py-4">Cargando…</div>}
+        {loading && <div className="text-center text-muted py-4">Loading....</div>}
 
         {!loading && followingUsers.length === 0 && (
-          <div className="text-center text-muted py-4">No estás siguiendo a nadie aún.</div>
+          <div className="text-center text-muted py-4">You are not following any accounts</div>
         )}
 
         <div className="row g-4">
