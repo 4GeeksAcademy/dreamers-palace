@@ -137,7 +137,7 @@ export const StoryWithChapters = () => {
                   <div className="card-body">
                     <div className="d-flex align-items-start justify-content-between">
                       <div>
-                        <h2 className="mb-1">{story.title}</h2>
+                        <h2 className="mb-1">{story.title}</h2>git 
                       </div>
 
                       {!isOwnerOrAdmin && (
