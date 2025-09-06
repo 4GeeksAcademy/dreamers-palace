@@ -17,6 +17,8 @@ export const WriterProfile = () => {
   const viewUserId = Number(params.get("user_id")) || me?.id;
 
   const [displayName, setDisplayName] = useState(me?.display_name || "User");
+  const [owner, setOwner] = useState(null);
+
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [followersCount, setFollowersCount] = useState(null);
@@ -37,8 +39,8 @@ export const WriterProfile = () => {
           throw new Error(`HTTP ${resp.status} — ${error.slice(0,160)}`);
         }
         if (!ct.includes("application/json")) {
-            const error = await resp.text().catch(()=> "");
-            throw new Error(`JSON (${ct}). Start: ${error.slice(0,160)}`);
+          const error = await resp.text().catch(()=> "");
+          throw new Error(`JSON (${ct}). Start: ${error.slice(0,160)}`);
         }
         const raw = await resp.json();
         const list = Array.isArray(raw) ? raw : (raw?.items ?? raw?.data ?? raw?.results ?? []);
@@ -49,8 +51,11 @@ export const WriterProfile = () => {
         const ctu = usersResp.headers.get("content-type") || "";
         if (usersResp.ok && ctu.includes("application/json")) {
           const users = await usersResp.json();
-          const owner = Array.isArray(users) ? users.find(u => u.id === viewUserId) : null;
-          if (owner?.display_name) setDisplayName(owner.display_name);
+          const ownerFound = Array.isArray(users) ? users.find(u => u.id === viewUserId) : null;
+          if (ownerFound) {
+            setOwner(ownerFound);
+            if (ownerFound.display_name) setDisplayName(ownerFound.display_name);
+          }
         }
 
         const [rfollowers, rfollowing] = await Promise.allSettled([
@@ -120,44 +125,85 @@ export const WriterProfile = () => {
     <div className="container my-4">
       {err && <div className="alert alert-danger">{err}</div>}
 
-      <div className="bg-white p-3 rounded shadow">
-        <h1 className="mb-4">Stories</h1>
+      <div className="row g-4">
+        <aside className="col-12 col-lg-3">
+          <div className="bg-white p-3 rounded shadow">
+            <h5 className="mb-3">About</h5>
 
-        {loading && <div className="text-center text-muted py-4">Cargando…</div>}
+            <p className="mb-2">
+              <strong>Description:</strong>{" "}
+              {owner?.bio || ""}
+            </p>
+            <p className="mb-2">
+              <strong>Location:</strong>{" "}
+              {owner?.location || ""}
+            </p>
+            <p className="mb-0">
+              <strong>Joined at:</strong>{" "}
+              {owner?.created_at || "—"}
+            </p>
 
-        {!loading && stories.length === 0 && (
-          <div className="text-center text-muted py-4">Aún no hay historias publicadas.</div>
-        )}
+            <hr className="my-3" />
 
-        <div className="d-flex flex-wrap gap-4">
-          {!loading && stories.map((s) => {
-            const cover = s.cover_url || examplecover;
-            return (
-              <div key={s.id} className="d-flex bg-light rounded shadow-sm p-2" style={{ width: "350px" }}>
-                <div style={{ flex: "0 0 120px" }}>
-                  <img src={cover} className="img-fluid rounded" alt={`${s.title} cover`} />
-                </div>
-                <div className="ps-2">
-                  <h5 className="card-title mb-1">
-                    <Link to={`/story/${s.id}`} className="text-decoration-none">{s.title}</Link>
-                  </h5>
-                  <p className="card-text small mb-1">{s.synopsis || "Sinopsis no disponible."}</p>
-                  <small className="text-body-secondary d-block mb-1">Last updated {s.updated_at}</small>
-                  {Array.isArray(s.tags) && s.tags.map((t) => {
-                    const tagId = t?.id ?? t?.slug ?? String(t);
-                    const tagName = t?.name ?? String(t);
-                    const tagSlug = t?.slug ?? encodeURIComponent(String(t));
-                    return (
-                      <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 small">
-                        {tagName}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+            <h6 className="mb-2">Share Profile</h6>
+            <div className="d-flex gap-3">
+              <a href="#" aria-label="Twitter">
+                <i className="fa-brands fa-twitter" style={{ fontSize: "30px" }}></i>
+              </a>
+              <a href="#" aria-label="Facebook">
+                <i className="fa-brands fa-facebook" style={{ fontSize: "30px" }}></i>
+              </a>
+              <a href="#" aria-label="Instagram">
+                <i className="fa-brands fa-instagram" style={{ fontSize: "30px" }}></i>
+              </a>
+              <a href="#" aria-label="Email">
+                <i className="fa-solid fa-envelope" style={{ fontSize: "30px" }}></i>
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <section className="col-12 col-lg-9">
+          <div className="bg-white p-3 rounded shadow">
+            <h1 className="mb-4">Stories</h1>
+
+            {loading && <div className="text-center text-muted py-4">Cargando…</div>}
+
+            {!loading && stories.length === 0 && (
+              <div className="text-center text-muted py-4">Aún no hay historias publicadas.</div>
+            )}
+
+            <div className="d-flex flex-wrap gap-4">
+              {!loading && stories.map((s) => {
+                const cover = s.cover_url || examplecover;
+                return (
+                  <div key={s.id} className="d-flex bg-light rounded shadow-sm p-2" style={{ width: "350px" }}>
+                    <div style={{ flex: "0 0 120px" }}>
+                      <img src={cover} className="img-fluid rounded" alt={`${s.title} cover`} />
+                    </div>
+                    <div className="ps-2">
+                      <h5 className="card-title mb-1">
+                        <Link to={`/story/${s.id}`} className="text-decoration-none">{s.title}</Link>
+                      </h5>
+                      <p className="card-text small mb-1">{s.synopsis || "Sinopsis no disponible."}</p>
+                      <small className="text-body-secondary d-block mb-1">Last updated {s.updated_at}</small>
+                      {Array.isArray(s.tags) && s.tags.map((t) => {
+                        const tagId = t?.id ?? t?.slug ?? String(t);
+                        const tagName = t?.name ?? String(t);
+                        const tagSlug = t?.slug ?? encodeURIComponent(String(t));
+                        return (
+                          <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 small">
+                            {tagName}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </>);

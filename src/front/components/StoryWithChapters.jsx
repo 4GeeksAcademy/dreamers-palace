@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-
+import examplecover from "../assets/img/dragon_cover.jpg";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
@@ -112,7 +112,9 @@ export const StoryWithChapters = () => {
       navigate(`/story/${id}/chapters/${published.id}`);
     }
   }
+
   const visibleChapters = chapters.filter(c => !c.deleted_at);
+  const cover = story?.cover_url || examplecover;
 
   return (
     <div className="container-xxl my-4">
@@ -123,45 +125,50 @@ export const StoryWithChapters = () => {
         <div className="row g-3">
           <div className="col-12 col-lg-8">
             <div className="card shadow-sm mb-3">
-              <div className="card-body">
-                <div className="d-flex align-items-start justify-content-between">
-                  <div>
-                    <h2 className="mb-1">{story.title}</h2>
-                    <div className="text-muted">
-                      by{" "}
-                      <Link to={`/writer?user_id=${story.author_id}`} className="link-secondary">
-                        {story.author?.display_name || "Author"}
-                      </Link>
-                    </div>
-                  </div>
-
-                  {!isOwnerOrAdmin && (
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={openFirstReadableChapter}
-                    >
-                      Read
-                    </button>
-                  )}
+              <div className="row g-0">
+                <div className="col-12 col-md-4">
+                  <img
+                    src={cover}
+                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+                    alt={`${story.title} cover`}
+                  />
                 </div>
+                <div className="col-12 col-md-8">
+                  <div className="card-body">
+                    <div className="d-flex align-items-start justify-content-between">
+                      <div>
+                        <h2 className="mb-1">{story.title}</h2>
+                      </div>
 
-                <p className="mt-3 mb-2">{story.synopsis || "Synopsis unavailable."}</p>
-                <div className="small text-secondary">Last updated {story.updated_at}</div>
+                      {!isOwnerOrAdmin && (
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={openFirstReadableChapter}
+                        >
+                          Read
+                        </button>
+                      )}
+                    </div>
 
-                {Array.isArray(story.tags) && story.tags.length > 0 && (
-                  <div className="mt-2">
-                    {story.tags.map(t => {
-                      const tagId = t?.id ?? t?.slug ?? String(t);
-                      const tagName = t?.name ?? String(t);
-                      const tagSlug = t?.slug ?? encodeURIComponent(String(t));
-                      return (
-                        <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 badge text-bg-light">
-                          {tagName}
-                        </Link>
-                      );
-                    })}
+                    <p className="mt-3 mb-2">{story.synopsis || "Synopsis unavailable."}</p>
+                    <div className="small text-secondary">Last updated {story.updated_at}</div>
+
+                    {Array.isArray(story.tags) && story.tags.length > 0 && (
+                      <div className="mt-2">
+                        {story.tags.map(t => {
+                          const tagId = t?.id ?? t?.slug ?? String(t);
+                          const tagName = t?.name ?? String(t);
+                          const tagSlug = t?.slug ?? encodeURIComponent(String(t));
+                          return (
+                            <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 badge text-bg-light">
+                              {tagName}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
