@@ -21,18 +21,12 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RecoveryPage } from "./pages/RecoveryPage";
 import { VisitorPage } from "./pages/VisitorPage";
-<<<<<<< HEAD
-import { StoryWithChapters } from "./components/StoryWithChapters";
-import { ChapterReader } from "./components/ChapterReader";
-import { Libro } from "./components/Libro";
-=======
 import { Libro } from "./pages/Libro";
 import { CapituloO } from "./pages/CapituloO";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
 
->>>>>>> 94ff9454ac8fbe2826087ac6a5bb8db2cd62c069
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
