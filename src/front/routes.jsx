@@ -21,9 +21,12 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RecoveryPage } from "./pages/RecoveryPage";
 import { VisitorPage } from "./pages/VisitorPage";
+import { Libro } from "./pages/Libro";
+import { CapituloO } from "./pages/CapituloO";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
+
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -47,6 +50,8 @@ export const router = createBrowserRouter(
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/recovery" element={<RecoveryPage />} />
       <Route path="/visitor" element={<VisitorPage />} />
+      <Route path="/libro" element={<Libro />} />
+      <Route path="/capituloO" element={<CapituloO />} />
     </Route>
   )
 );
