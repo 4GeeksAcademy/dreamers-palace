@@ -10,7 +10,7 @@ from api.models import (
 )
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 import re
 
 api = Blueprint('api', __name__)
@@ -26,6 +26,13 @@ def get_current_user():
     except (TypeError, ValueError):
         pass
     return db.session.get(User, uid) if uid is not None else None
+
+def get_current_user_optional():
+    try:
+        verify_jwt_in_request(optional=True)
+    except Exception:
+        return None
+    return get_current_user()
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -368,6 +375,69 @@ def recent_stories():
     user = get_current_user()
     viewed = (StoryView.query.filter_by(user_id=user.id).order_by(StoryView.last_viewed_at.desc()).limit(5))
     return jsonify([sv.serialize() for sv in viewed.all()]), 200
+
+@api.route('/stories/<int:story_id>/chapters/<int:chapter_id>', methods=['GET'])
+def get_chapter(story_id: int, chapter_id: int):
+    c = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
+    if not c or c.deleted_at is not None:
+        return jsonify({"error": "not_found"}), 404
+
+    if c.status != ChapterStatus.PUBLISHED:
+        user = get_current_user_optional()
+        if not user or (user.id != c.story.author_id and user.user_role != UserRole.ADMIN):
+            return jsonify({"error": "forbidden"}), 403
+
+    return jsonify(c.serialize()), 200
+
+@api.route('/stories/<int:story_id>/chapters/<int:chapter_id>', methods=['PATCH'])
+@jwt_required()
+def update_chapter(story_id: int, chapter_id: int):
+    user = get_current_user()
+    c = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
+    if not c or c.deleted_at is not None:
+        return jsonify({"error": "not_found"}), 404
+    if c.story.author_id != user.id and user.user_role != UserRole.ADMIN:
+        return jsonify({"error": "forbidden"}), 403
+
+    data = request.get_json() or {}
+
+    if "title" in data and data["title"] is not None:
+        title = (data.get("title") or "").strip()
+        if not title:
+            return jsonify({"error": "missing_title"}), 400
+        c.title = title
+
+    if "number" in data and data["number"] is not None:
+        try:
+            n = int(data["number"])
+            if n < 1:
+                raise ValueError()
+        except (TypeError, ValueError):
+            return jsonify({"error": "invalid_number"}), 422
+        c.number = n
+
+    if "content" in data and data["content"] is not None:
+        content = (data.get("content") or "").strip()
+        if not content:
+            return jsonify({"error": "missing_content"}), 400
+        c.content = content
+
+    if "status" in data and data["status"] is not None:
+        try:
+            new_status = ChapterStatus(data["status"])
+        except ValueError:
+            return jsonify({"error": "invalid_status"}), 422
+        old_status = c.status
+        c.status = new_status
+
+        if old_status != ChapterStatus.PUBLISHED and new_status == ChapterStatus.PUBLISHED:
+            c.published_at = func.now()
+        elif new_status != ChapterStatus.PUBLISHED:
+            c.published_at = None
+
+
+    db.session.commit()
+    return jsonify(c.serialize()), 200
 
 @api.route("/stories/<int:story_id>/view", methods=["POST"])
 @jwt_required()

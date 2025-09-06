@@ -68,7 +68,7 @@ export const StoryCreation = () => {
     evt.preventDefault()
     const imageForm = new FormData()
     imageForm.append("file",image)
-    imageForm.append("upload_preset", "") 
+    imageForm.append("upload_preset", "Dreamers Palace") 
 
     const resp = await fetch('https://api.cloudinary.com/v1_1/dkcyznoxl/image/upload', {
       method: 'POST',
@@ -138,7 +138,7 @@ export const StoryCreation = () => {
                   <input type="file" onChange={ evt => setImage(evt.target.files[0])} />
                     {
                       image &&
-                      <img src={URL.createObjectURL(image)} alt="" style={{ maxHeight: '300px' , maxWidth: '300px' }} />
+                      <img src={URL.createObjectURL(image)} alt="" style={{ maxHeight: '250px' , maxWidth: '250px' }} />
                     }
                     {
                       image &&
