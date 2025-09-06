@@ -61,6 +61,24 @@ export const StoryCreation = () => {
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
 
+  const [image, setImage] = useState(null)
+
+  const uploadImageToCloudinary = async (evt) => {
+    
+    evt.preventDefault()
+    const imageForm = new FormData()
+    imageForm.append("file",image)
+    imageForm.append("upload_preset", "") 
+
+    const resp = await fetch('https://api.cloudinary.com/v1_1/dkcyznoxl/image/upload', {
+      method: 'POST',
+      body: imageForm
+    })
+    const data = await resp.json
+
+    console.log(data)
+  }
+
   useEffect(() => {
     (async () => {
       try {
@@ -110,14 +128,36 @@ export const StoryCreation = () => {
   };
 
   return (
+
     <div className="container-xxl my-4">
+      
+      <div>
+                  <label htmlFor="exampleFormControlTextarea1" className="form-label">
+                    Insert Image
+                  </label>
+                  <input type="file" onChange={ evt => setImage(evt.target.files[0])} />
+                    {
+                      image &&
+                      <img src={URL.createObjectURL(image)} alt="" style={{ maxHeight: '300px' , maxWidth: '300px' }} />
+                    }
+                    {
+                      image &&
+                      <button onClick={() =>setImage(null)}>Clear Image </button>
+                    }
+                    {
+                      image &&
+                      <button onClick={(evt) => uploadImageToCloudinary(evt)}>
+                        Upload Image
+                      </button>
+                    }
+                </div>
+
       <form onSubmit={onSubmit}>
         <div className="row g-3">
           <div className="col-12 col-lg-8">
             <div className="card shadow-sm">
               <div className="card-body">
                 {err && <div className="alert alert-danger mb-3">{err}</div>}
-
                 <div className="row g-3 align-items-center">
                   <div className="col-12 col-md-6">
                     <label className="form-label">Story title</label>
