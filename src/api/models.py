@@ -8,7 +8,6 @@ from typing import Optional, List
 
 db = SQLAlchemy()
 
-# avoid conflicts when serializing timezones in "updated_at" and "created_at"
 def _iso(dt):
     return dt and dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -101,26 +100,16 @@ class Story(db.Model):
         server_default=StoryStatus.DRAFT.value,
     )
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(
-        db.DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
-
-    category_id: Mapped[Optional[int]] = mapped_column(
-        db.ForeignKey("category.id", ondelete="SET NULL")
-    )
+    category_id: Mapped[Optional[int]] = mapped_column(db.ForeignKey("category.id", ondelete="SET NULL"))
     category: Mapped[Optional["Category"]] = relationship(back_populates="stories")
-    author: Mapped[User] = relationship(back_populates="stories")
-    chapters: Mapped[List["Chapter"]] = relationship(
-        back_populates="story", cascade="all", order_by="Chapter.number"
-    )
+    author: Mapped["User"] = relationship(back_populates="stories")
+    chapters: Mapped[List["Chapter"]] = relationship(back_populates="story", cascade="all", order_by="Chapter.number")
     views: Mapped[List["StoryView"]] = relationship(back_populates="story", cascade="all")
-    comments: Mapped[List["Comment"]] = relationship(
-        back_populates="story", foreign_keys="Comment.story_id"
-    )
+    comments: Mapped[List["Comment"]] = relationship(back_populates="story", foreign_keys="Comment.story_id")
+
     tags: Mapped[List["Tag"]] = relationship(secondary=story_tag, back_populates="stories")
 
     def serialize(self):
@@ -157,15 +146,12 @@ class Chapter(db.Model):
         server_default=ChapterStatus.DRAFT.value,
     )
     published_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(
-        db.DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(db.DateTime(timezone=True))
 
     story: Mapped[Story] = relationship(back_populates="chapters")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="chapter", cascade="all")
 
     def serialize(self):
         return {
@@ -205,6 +191,7 @@ class Comment(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     story_id: Mapped[int] = mapped_column(db.ForeignKey("story.id", ondelete="CASCADE"), nullable=False)
+    chapter_id: Mapped[Optional[int]] = mapped_column(db.ForeignKey("chapter.id", ondelete="CASCADE"),nullable=True)
     text: Mapped[str] = mapped_column(String(280), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         db.DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -216,12 +203,18 @@ class Comment(db.Model):
 
     user: Mapped["User"] = relationship(back_populates="comments")
     story: Mapped[Optional["Story"]] = relationship(back_populates="comments")
+    chapter: Mapped[Optional["Chapter"]] = relationship(back_populates="comments")
+
+    __table_args__ = (
+        db.Index("ix_comment_story_chapter_created", "story_id", "chapter_id", "created_at"),
+    )
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
             "story_id": self.story_id,
+            "chapter_id": self.chapter_id,
             "text": self.text,
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),

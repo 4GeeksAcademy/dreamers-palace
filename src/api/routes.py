@@ -484,6 +484,41 @@ def list_comments():
     comment_list = comment_list.order_by(Comment.created_at.desc())
     return jsonify([c.serialize() for c in comment_list.limit(100).all()])
 
+@api.route('/stories/<int:story_id>/chapters/<int:chapter_id>/comments', methods=['GET'])
+def list_chapter_comments(story_id: int, chapter_id: int):
+    items = (Comment.query
+             .filter_by(story_id=story_id, chapter_id=chapter_id)
+             .order_by(Comment.created_at.desc())
+             .limit(100)
+             .all())
+    return jsonify([c.serialize() for c in items]), 200
+
+
+@api.route('/stories/<int:story_id>/chapters/<int:chapter_id>/comments', methods=['POST'])
+@jwt_required()
+def create_chapter_comment(story_id: int, chapter_id: int):
+    user = get_current_user()
+    ch = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
+    if not ch or ch.deleted_at is not None:
+        return jsonify({"error": "not_found"}), 404
+
+    data = request.get_json() or {}
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "missing_fields"}), 400
+    if len(text) > 280:
+        return jsonify({"error": "too_long"}), 400
+
+    new_comment = Comment(
+        user_id=user.id,
+        story_id=story_id,
+        chapter_id=chapter_id, 
+        text=text
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+    return jsonify(new_comment.serialize()), 201
+
 @api.route("/follows", methods=["GET"])
 def list_follows():
     following_id = request.args.get("following_id", type=int)

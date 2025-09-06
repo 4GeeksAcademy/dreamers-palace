@@ -26,6 +26,7 @@ import { CapituloO } from "./pages/CapituloO";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
+import { ChapterCommentForm } from "./components/ChapterCommentForm";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(

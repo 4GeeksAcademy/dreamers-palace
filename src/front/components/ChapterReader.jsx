@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ChapterCommentForm } from "./ChapterCommentForm";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
@@ -148,6 +149,15 @@ export const ChapterReader = () => {
                           Next →
                         </Link>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Comentarios por capítulo */}
+                  <div className="card shadow-sm mt-4">
+                    <div className="card-body">
+                      <h5 className="card-title mb-3">Comments</h5>
+                      {/* 👇 Asegúrate de pasar storyId y chapterId */}
+                      <ChapterCommentForm storyId={storyId} chapterId={chapId} />
                     </div>
                   </div>
                 </>

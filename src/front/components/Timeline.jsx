@@ -46,10 +46,8 @@ export const Timeline = () => {
       }
     };
 
-    // Carga historias
     load();
 
-    // Carga autores (para mostrar display_name del author_id)
     (async () => {
       try {
         const r = await fetch(`${API_BASE}/api/user`, {
@@ -65,7 +63,7 @@ export const Timeline = () => {
           setAuthorsById(map);
         }
       } catch {
-        // Silencioso: si falla, mostramos "Unknown author"
+
       }
     })();
   }, []);
