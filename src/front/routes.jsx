@@ -23,6 +23,7 @@ import { RecoveryPage } from "./pages/RecoveryPage";
 import { VisitorPage } from "./pages/VisitorPage";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
+import { ChapterEdit } from "./components/ChapterEdit";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,6 +38,7 @@ export const router = createBrowserRouter(
       <Route path="/story/:id" element={<StoryWithChapters />} />
       <Route path="/story/:id/chapters/new" element={<ChapterCreation />} />
       <Route path="/story/:id/chapters/:chapterId" element={<ChapterReader />} />
+      <Route path="/story/:id/chapters/:chapterId/edit" element={<ChapterEdit />} />
       <Route path="/chapter" element={<ChapterPage />} />
       <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/writer" element={<WriterProfile />} />
