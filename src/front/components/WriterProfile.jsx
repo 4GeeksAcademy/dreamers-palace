@@ -32,82 +32,96 @@ export const WriterProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loadingFollow, setLoadingFollow] = useState(false);
 
-  useEffect(() => {
+  async function loadAll() {
     if (!viewUserId) { setLoading(false); return; }
+    try {
+      setErr(null);
 
-    (async () => {
-      try {
-        setErr(null);
+      const resp = await fetch(`${API_BASE}/api/stories?author_id=${viewUserId}`, {
+        headers: { Accept: "application/json" },
+      });
+      const ct = resp.headers.get("content-type") || "";
+      if (!resp.ok) {
+        const error = await resp.text().catch(()=> "");
+        throw new Error(`HTTP ${resp.status} — ${error.slice(0,160)}`);
+      }
+      if (!ct.includes("application/json")) {
+        const error = await resp.text().catch(()=> "");
+        throw new Error(`JSON (${ct}). Start: ${error.slice(0,160)}`);
+      }
+      const raw = await resp.json();
+      const list = Array.isArray(raw) ? raw : (raw?.items ?? raw?.data ?? raw?.results ?? []);
+      if (!Array.isArray(list)) throw new Error("The response is not a list");
+      setStories(list);
 
-        const resp = await fetch(`${API_BASE}/api/stories?author_id=${viewUserId}`, {
+      const usersResp = await fetch(`${API_BASE}/api/user`, { headers: { Accept: "application/json" } });
+      const ctu = usersResp.headers.get("content-type") || "";
+      if (usersResp.ok && ctu.includes("application/json")) {
+        const users = await usersResp.json();
+        const ownerFound = Array.isArray(users) ? users.find(u => u.id === viewUserId) : null;
+        if (ownerFound) {
+          setOwner(ownerFound);
+          if (ownerFound.display_name) setDisplayName(ownerFound.display_name);
+        }
+      }
+
+      const [rfollowers, rfollowing] = await Promise.allSettled([
+        fetch(`${API_BASE}/api/follows?following_id=${viewUserId}`, { headers: { Accept: "application/json" } }),
+        fetch(`${API_BASE}/api/follows?follower_id=${viewUserId}`,  { headers: { Accept: "application/json" } }),
+      ]);
+
+      if (rfollowers.status === "fulfilled") {
+        const r = rfollowers.value;
+        const ctf = r.headers.get("content-type") || "";
+        if (r.ok && ctf.includes("application/json")) {
+          const arr = await r.json();
+          setFollowersCount(Array.isArray(arr) ? arr.length : 0);
+        }
+      }
+      if (rfollowing.status === "fulfilled") {
+        const r = rfollowing.value;
+        const ctf = r.headers.get("content-type") || "";
+        if (r.ok && ctf.includes("application/json")) {
+          const arr = await r.json();
+          setFollowingCount(Array.isArray(arr) ? arr.length : 0);
+        }
+      }
+
+      if (me?.id && me.id !== viewUserId) {
+        const r = await fetch(`${API_BASE}/api/follows?follower_id=${me.id}&following_id=${viewUserId}`, {
           headers: { Accept: "application/json" },
         });
-        const ct = resp.headers.get("content-type") || "";
-        if (!resp.ok) {
-          const error = await resp.text().catch(()=> "");
-          throw new Error(`HTTP ${resp.status} — ${error.slice(0,160)}`);
+        const ctCheck = r.headers.get("content-type") || "";
+        if (r.ok && ctCheck.includes("application/json")) {
+          const arr = await r.json();
+          setIsFollowing(Array.isArray(arr) && arr.length > 0);
         }
-        if (!ct.includes("application/json")) {
-          const error = await resp.text().catch(()=> "");
-          throw new Error(`JSON (${ct}). Start: ${error.slice(0,160)}`);
-        }
-        const raw = await resp.json();
-        const list = Array.isArray(raw) ? raw : (raw?.items ?? raw?.data ?? raw?.results ?? []);
-        if (!Array.isArray(list)) throw new Error("The response is not a list");
-        setStories(list);
-
-        const usersResp = await fetch(`${API_BASE}/api/user`, { headers: { Accept: "application/json" } });
-        const ctu = usersResp.headers.get("content-type") || "";
-        if (usersResp.ok && ctu.includes("application/json")) {
-          const users = await usersResp.json();
-          const ownerFound = Array.isArray(users) ? users.find(u => u.id === viewUserId) : null;
-          if (ownerFound) {
-            setOwner(ownerFound);
-            if (ownerFound.display_name) setDisplayName(ownerFound.display_name);
-          }
-        }
-
-        const [rfollowers, rfollowing] = await Promise.allSettled([
-          fetch(`${API_BASE}/api/follows?following_id=${viewUserId}`, { headers: { Accept: "application/json" } }),
-          fetch(`${API_BASE}/api/follows?follower_id=${viewUserId}`,  { headers: { Accept: "application/json" } }),
-        ]);
-
-        if (rfollowers.status === "fulfilled") {
-          const r = rfollowers.value;
-          const ctf = r.headers.get("content-type") || "";
-          if (r.ok && ctf.includes("application/json")) {
-            const arr = await r.json();
-            setFollowersCount(Array.isArray(arr) ? arr.length : 0);
-          }
-        }
-        if (rfollowing.status === "fulfilled") {
-          const r = rfollowing.value;
-          const ctf = r.headers.get("content-type") || "";
-          if (r.ok && ctf.includes("application/json")) {
-            const arr = await r.json();
-            setFollowingCount(Array.isArray(arr) ? arr.length : 0);
-          }
-        }
-
-        if (me?.id && me.id !== viewUserId) {
-          const r = await fetch(`${API_BASE}/api/follows?follower_id=${me.id}&following_id=${viewUserId}`, {
-            headers: { Accept: "application/json" },
-          });
-          const ctCheck = r.headers.get("content-type") || "";
-          if (r.ok && ctCheck.includes("application/json")) {
-            const arr = await r.json();
-            setIsFollowing(Array.isArray(arr) && arr.length > 0);
-          }
-        } else {
-          setIsFollowing(false);
-        }
-
-      } catch (e) {
-        setErr(String(e.message || e));
-      } finally {
-        setLoading(false);
+      } else {
+        setIsFollowing(false);
       }
-    })();
+
+    } catch (e) {
+      setErr(String(e.message || e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadAll();
+    function onStorage(e) {
+      if (e.key === "user") {
+        try {
+          const u = JSON.parse(e.newValue || "null");
+          if (u?.id === viewUserId) {
+            setDisplayName(u.display_name || "User");
+            setOwner(prev => prev ? { ...prev, ...u } : u);
+          }
+        } catch {}
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [viewUserId, me?.id]);
 
   const isOwnProfile = me?.id && me.id === viewUserId;
@@ -117,7 +131,7 @@ export const WriterProfile = () => {
       setErr("Debes iniciar sesión para seguir usuarios.");
       return;
     }
-    if (isOwnProfile) return; 
+    if (isOwnProfile) return;
 
     setLoadingFollow(true);
     setErr(null);

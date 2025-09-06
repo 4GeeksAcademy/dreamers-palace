@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, and_
 from api.models import (
     db, User, Story, Chapter, Comment, Follower,
     UserRole, StoryStatus, ChapterStatus, StoryView,
@@ -45,6 +45,53 @@ def handle_hello():
 def get_user():
     users = User.query.all()
     return jsonify([user.serialize() for user in users]), 200
+
+@api.route('/user/me', methods=['GET'])
+@jwt_required()
+def get_me():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "unauthorized"}), 401
+    return jsonify(user.serialize()), 200
+
+@api.route('/user/me', methods=['PATCH'])
+@jwt_required()
+def update_me():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "unauthorized"}), 401
+
+    data = request.get_json() or {}
+
+    if "display_name" in data and data["display_name"] is not None:
+        new_dn = (data.get("display_name") or "").strip()
+        if not new_dn:
+            return jsonify({"error": "missing_display_name"}), 400
+        if len(new_dn) > 80:
+            return jsonify({"error": "display_name_too_long"}), 422
+        exists = User.query.filter(and_(User.display_name == new_dn, User.id != user.id)).first()
+        if exists:
+            return jsonify({"error": "display_name_taken"}), 409
+        user.display_name = new_dn
+
+    if "bio" in data:
+        bio = data.get("bio")
+        if bio is not None:
+            bio = str(bio).strip()
+            if len(bio) > 1000:
+                return jsonify({"error": "bio_too_long"}), 422
+        user.bio = bio
+
+    if "location" in data:
+        loc = data.get("location")
+        if loc is not None:
+            loc = str(loc).strip()
+            if len(loc) > 120:
+                return jsonify({"error": "location_too_long"}), 422
+        user.location = loc
+
+    db.session.commit()
+    return jsonify(user.serialize()), 200
 
 
 @api.route('/auth/register', methods=['POST'])

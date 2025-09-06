@@ -31,6 +31,8 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     display_name: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    bio: Mapped[Optional[str]] = mapped_column(String(1000))
+    location: Mapped[Optional[str]] = mapped_column(String(120))
     user_role: Mapped[UserRole] = mapped_column(
         db.Enum(
             UserRole,
@@ -70,6 +72,8 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "display_name": self.display_name,
+            "bio": self.bio,
+            "location": self.location,
             "user_role": self.user_role.value,
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),

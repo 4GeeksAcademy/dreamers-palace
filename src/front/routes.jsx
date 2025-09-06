@@ -1,4 +1,4 @@
-// Import necessary components and functions from react-router-dom.
+// router.jsx
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -14,7 +14,7 @@ import { StoryPage } from "./pages/Story";
 import { StoryCreation } from "./components/StoryCreation";
 import { ChapterCreation } from "./components/ChapterCreation";
 import { ChapterPage } from "./pages/Chapter";
-import { WriterPage } from "./pages/Writer";
+// import { WriterPage } from "./pages/Writer"; // ⬅️ quítala si ya no la usas
 import { WriterProfile } from "./components/WriterProfile";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
@@ -26,7 +26,7 @@ import { CapituloO } from "./pages/CapituloO";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
-import { ChapterCommentForm } from "./components/ChapterCommentForm";
+import { WriterProfileEdit } from "./components/WriterProfileEdit"; // ✅ IMPORT
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,7 +43,6 @@ export const router = createBrowserRouter(
       <Route path="/story/:id/chapters/:chapterId" element={<ChapterReader />} />
       <Route path="/story/:id/chapters/:chapterId/edit" element={<ChapterEdit />} />
       <Route path="/chapter" element={<ChapterPage />} />
-      <Route path="/writerpage" element={<WriterPage />} />
       <Route path="/writer" element={<WriterProfile />} />
       <Route path="/following" element={<FollowingWritter />} />
       <Route path="/login" element={<LoginPage />} />
@@ -52,6 +51,7 @@ export const router = createBrowserRouter(
       <Route path="/visitor" element={<VisitorPage />} />
       <Route path="/libro" element={<Libro />} />
       <Route path="/capituloO" element={<CapituloO />} />
+      <Route path="/writerpage" element={<WriterProfileEdit />} />
     </Route>
   )
 );
