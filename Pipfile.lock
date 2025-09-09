@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d2e672e650278aeeee2fe49bd76d76497d8b65a50f8b5dbb121d265cbc6ef4e5"
+            "sha256": "5bbeb1bb8014a15dbaaadd268caf0f5e2855789bd18ecf45ff6bd32dce1b629f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,6 +23,15 @@
             ],
             "markers": "python_version >= '3.9'",
             "version": "==1.16.5"
+        },
+        "arrow": {
+            "hashes": [
+                "sha256:c728b120ebc00eb84e01882a6f5e7927a53960aa990ce7dd2b10f39005a67f80",
+                "sha256:d4540617648cb5f895730f1ad8c82a65f2dad0166f57b75f3ca54759c4d67a85"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==1.3.0"
         },
         "blinker": {
             "hashes": [
@@ -368,6 +377,14 @@
             "markers": "python_version >= '3.9'",
             "version": "==2.10.1"
         },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3",
+                "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
+            "version": "==2.9.0.post0"
+        },
         "python-dotenv": {
             "hashes": [
                 "sha256:31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc",
@@ -507,6 +524,14 @@
             "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.0.43"
+        },
+        "types-python-dateutil": {
+            "hashes": [
+                "sha256:849d52b737e10a6dc6621d2bd7940ec7c65fcb69e6aa2882acf4e56b2b508ddc",
+                "sha256:84c92c34bd8e68b117bff742bc00b692a1e8531262d4507b33afcc9f7716cd53"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==2.9.0.20250822"
         },
         "typing-extensions": {
             "hashes": [

@@ -1,3 +1,4 @@
+import arrow
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,8 +10,15 @@ from typing import Optional, List
 db = SQLAlchemy()
 
 def _iso(dt):
-    return dt and dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    if not dt: 
+        return None
+    return arrow.get(dt).to('utc').format('YYYY-MM-DDTHH:mm:ss[Z]')
 
+def _human(dt, locale='en'):
+    if not dt:
+        return None
+    return arrow.get(dt).humanize(locale=locale)
+    
 class UserRole(PyEnum):
     READER = "READER"
     WRITER = "WRITER"
@@ -67,7 +75,7 @@ class User(db.Model):
         cascade="all",
     )
 
-    def serialize(self):
+    def serialize(self, locale:str='en'):
         return {
             "id": self.id,
             "email": self.email,
@@ -77,6 +85,9 @@ class User(db.Model):
             "user_role": self.user_role.value,
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),
+            "created_at_human": _human(self.created_at, locale), 
+            "updated_at_human": _human(self.updated_at, locale)
+
         }
 
 story_tag = db.Table(
@@ -116,7 +127,7 @@ class Story(db.Model):
 
     tags: Mapped[List["Tag"]] = relationship(secondary=story_tag, back_populates="stories")
 
-    def serialize(self):
+    def serialize(self, locale:str='en'):
         return {
             "id": self.id,
             "author_id": self.author_id,
@@ -127,6 +138,9 @@ class Story(db.Model):
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),
             "deleted_at": _iso(self.deleted_at),
+            "created_at_human": _human(self.created_at, locale), 
+            "updated_at_human": _human(self.updated_at, locale),
+            "deleted_at_human": _human(self.deleted_at, locale),
             "category": self.category.serialize() if self.category else None,
             "tags": [t.serialize() for t in self.tags],
         }
@@ -157,7 +171,7 @@ class Chapter(db.Model):
     story: Mapped[Story] = relationship(back_populates="chapters")
     comments: Mapped[List["Comment"]] = relationship(back_populates="chapter", cascade="all")
 
-    def serialize(self):
+    def serialize(self, locale:str='en'):
         return {
             "id": self.id,
             "story_id": self.story_id,
@@ -169,6 +183,9 @@ class Chapter(db.Model):
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),
             "deleted_at": _iso(self.deleted_at),
+            "created_at_human": _human(self.created_at, locale), 
+            "updated_at_human": _human(self.updated_at, locale),
+            "deleted_at_human": _human(self.deleted_at, locale),
         }
 
 class StoryView(db.Model):
@@ -213,7 +230,7 @@ class Comment(db.Model):
         db.Index("ix_comment_story_chapter_created", "story_id", "chapter_id", "created_at"),
     )
 
-    def serialize(self):
+    def serialize(self, locale:str='en'):
         return {
             "id": self.id,
             "user_id": self.user_id,
@@ -223,6 +240,9 @@ class Comment(db.Model):
             "created_at": _iso(self.created_at),
             "updated_at": _iso(self.updated_at),
             "deleted_at": _iso(self.deleted_at),
+            "created_at_human": _human(self.created_at, locale), 
+            "updated_at_human": _human(self.updated_at, locale),
+            "deleted_at_human": _human(self.deleted_at, locale),
         }
 
 class Follower(db.Model):

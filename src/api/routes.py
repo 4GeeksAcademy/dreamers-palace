@@ -17,6 +17,16 @@ api = Blueprint('api', __name__)
 
 CORS(api)
 
+def _pick_locale() -> str:
+    # ?locale=es  o header Accept-Language: "es-CL,es;q=0.9,en;q=0.8"
+    loc = (request.args.get("locale") or "").strip()
+    if not loc:
+        al = (request.headers.get("Accept-Language") or "").split(",")[0]
+        loc = (al or "en").split("-")[0].strip().lower() or "en"
+    else:
+        loc = loc.split("-")[0].strip().lower()
+    return loc or "en"
+
 def get_current_user():
     uid = get_jwt_identity()
     if uid is None:
@@ -43,20 +53,23 @@ def handle_hello():
 
 @api.route('/user', methods=['GET'])
 def get_user():
+    loc = _pick_locale()
     users = User.query.all()
-    return jsonify([user.serialize() for user in users]), 200
+    return jsonify([user.serialize(locale=loc) for user in users]), 200
 
 @api.route('/user/me', methods=['GET'])
 @jwt_required()
 def get_me():
+    loc = _pick_locale()
     user = get_current_user()
     if not user:
         return jsonify({"error": "unauthorized"}), 401
-    return jsonify(user.serialize()), 200
+    return jsonify(user.serialize(locale=loc)), 200
 
 @api.route('/user/me', methods=['PATCH'])
 @jwt_required()
 def update_me():
+    loc = _pick_locale()
     user = get_current_user()
     if not user:
         return jsonify({"error": "unauthorized"}), 401
@@ -83,19 +96,20 @@ def update_me():
         user.bio = bio
 
     if "location" in data:
-        loc = data.get("location")
-        if loc is not None:
-            loc = str(loc).strip()
-            if len(loc) > 120:
+        loc_txt = data.get("location")
+        if loc_txt is not None:
+            loc_txt = str(loc_txt).strip()
+            if len(loc_txt) > 120:
                 return jsonify({"error": "location_too_long"}), 422
-        user.location = loc
+        user.location = loc_txt
 
     db.session.commit()
-    return jsonify(user.serialize()), 200
+    return jsonify(user.serialize(locale=loc)), 200
 
 
 @api.route('/auth/register', methods=['POST'])
 def register():
+    loc = _pick_locale()
     data = request.get_json() or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password")
@@ -108,10 +122,11 @@ def register():
     new_user = User(email=email, password=pwd_hash, display_name=display_name)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify(new_user.serialize()), 201
+    return jsonify(new_user.serialize(locale=loc)), 201
 
 @api.route('/auth/login', methods=['POST'])
 def login():
+    loc = _pick_locale()
     data = request.get_json() or {}
     email = (data.get("email") or "").strip().lower()
     password = data.get("password")
@@ -125,7 +140,7 @@ def login():
     return jsonify({
         "access_token": create_access_token(identity=str(new_user.id)),
         "refresh_token": create_refresh_token(identity=str(new_user.id)),
-        "user": new_user.serialize()
+        "user": new_user.serialize(locale=loc)
     }), 200
 
 @api.route('/categories', methods=['GET'])
@@ -201,6 +216,7 @@ def create_tag():
 @api.route('/stories', methods=['POST'])
 @jwt_required()
 def create_story():
+    loc = _pick_locale()
     user = get_current_user()
     if not user:
         return jsonify({"error": "unauthorized"}), 401
@@ -243,10 +259,11 @@ def create_story():
 
     db.session.add(new_story)
     db.session.commit()
-    return jsonify(new_story.serialize()), 201
+    return jsonify(new_story.serialize(locale=loc)), 201
 
 @api.route('/stories', methods=['GET'])
 def list_stories():
+    loc = _pick_locale()
     page = max(int(request.args.get("page", 1)), 1)
     per_page = min(max(int(request.args.get("per_page", 10)), 1), 50)
 
@@ -273,21 +290,23 @@ def list_stories():
     pag = list_order.paginate(page=page, per_page=per_page, error_out=False)
 
     return jsonify({
-        "items": [s.serialize() for s in pag.items],
+        "items": [s.serialize(locale=loc) for s in pag.items],
         "page": pag.page, "per_page": pag.per_page, "total": pag.total
     })
 
 @api.route('/stories/<int:story_id>', methods=['GET'])
 def get_story(story_id: int):
+    loc = _pick_locale()
     stories = db.session.get(Story, story_id)
     if not stories:
         return jsonify({"error": "not_found"}), 404
-    return jsonify(stories.serialize())
+    return jsonify(stories.serialize(locale=loc))
 
 # We use patch in order to partially update the record, PUT completely overrides the record.
 @api.route('/stories/<int:story_id>', methods=['PATCH'])
 @jwt_required()
 def update_story(story_id: int):
+    loc = _pick_locale()
     user = get_current_user()
     stories_update = db.session.get(Story, story_id)
     if not stories_update:
@@ -355,11 +374,12 @@ def update_story(story_id: int):
             return jsonify({"error": "invalid_tags"}), 422
 
     db.session.commit()
-    return jsonify(stories_update.serialize()), 200
+    return jsonify(stories_update.serialize(locale=loc)), 200
 
 @api.route('/stories/<int:story_id>/chapters', methods=['POST'])
 @jwt_required()
 def create_chapter(story_id: int):
+    loc = _pick_locale()
     user = get_current_user()
     stories = db.session.get(Story, story_id)
     if not stories:
@@ -386,7 +406,7 @@ def create_chapter(story_id: int):
     new_chapter = Chapter(story_id=story_id, title=title, number=int(number), content=content, status=new_status)
     db.session.add(new_chapter)
     db.session.commit()
-    return jsonify(new_chapter.serialize()), 201
+    return jsonify(new_chapter.serialize(locale=loc)), 201
 
 @api.route('/stories/<int:story_id>/chapters/<int:chapter_id>', methods=['DELETE'])
 @jwt_required()
@@ -412,13 +432,13 @@ def delete_chapter(story_id: int, chapter_id: int):
 
 @api.route("/stories/<int:story_id>/chapters", methods=["GET"])
 def list_chapters(story_id: int):
+    loc = _pick_locale()
     items = (Chapter.query
              .filter_by(story_id=story_id)
              .filter(Chapter.deleted_at.is_(None))
              .order_by(Chapter.number.asc())
              .all())
-    return jsonify([c.serialize() for c in items])
-
+    return jsonify([c.serialize(locale=loc) for c in items])
 
 @api.route("/user/me/recent-stories", methods=["GET"])
 @jwt_required()
@@ -429,6 +449,7 @@ def recent_stories():
 
 @api.route('/stories/<int:story_id>/chapters/<int:chapter_id>', methods=['GET'])
 def get_chapter(story_id: int, chapter_id: int):
+    loc = _pick_locale()
     c = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
     if not c or c.deleted_at is not None:
         return jsonify({"error": "not_found"}), 404
@@ -438,11 +459,12 @@ def get_chapter(story_id: int, chapter_id: int):
         if not user or (user.id != c.story.author_id and user.user_role != UserRole.ADMIN):
             return jsonify({"error": "forbidden"}), 403
 
-    return jsonify(c.serialize()), 200
+    return jsonify(c.serialize(locale=loc)), 200
 
 @api.route('/stories/<int:story_id>/chapters/<int:chapter_id>', methods=['PATCH'])
 @jwt_required()
 def update_chapter(story_id: int, chapter_id: int):
+    loc = _pick_locale()
     user = get_current_user()
     c = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
     if not c or c.deleted_at is not None:
@@ -486,9 +508,8 @@ def update_chapter(story_id: int, chapter_id: int):
         elif new_status != ChapterStatus.PUBLISHED:
             c.published_at = None
 
-
     db.session.commit()
-    return jsonify(c.serialize()), 200
+    return jsonify(c.serialize(locale=loc)), 200
 
 @api.route("/stories/<int:story_id>/view", methods=["POST"])
 @jwt_required()
@@ -512,6 +533,7 @@ def mark_view(story_id: int):
 @api.route("/comments", methods=["POST"])
 @jwt_required()
 def create_comment():
+    loc = _pick_locale()
     user = get_current_user()
     data = request.get_json() or {}
     story_id = data.get("story_id")
@@ -524,30 +546,32 @@ def create_comment():
     new_comment = Comment(user_id=user.id, story_id=int(story_id), text=text)
     db.session.add(new_comment)
     db.session.commit()
-    return jsonify(new_comment.serialize()), 201
+    return jsonify(new_comment.serialize(locale=loc)), 201
 
 @api.route("/comments", methods=["GET"])
 def list_comments():
+    loc = _pick_locale()
     story_id = request.args.get("story_id", type=int)
     comment_list = Comment.query
     if story_id:
         comment_list = comment_list.filter_by(story_id=story_id)
     comment_list = comment_list.order_by(Comment.created_at.desc())
-    return jsonify([c.serialize() for c in comment_list.limit(100).all()])
+    return jsonify([c.serialize(locale=loc) for c in comment_list.limit(100).all()])
 
 @api.route('/stories/<int:story_id>/chapters/<int:chapter_id>/comments', methods=['GET'])
 def list_chapter_comments(story_id: int, chapter_id: int):
+    loc = _pick_locale()
     items = (Comment.query
              .filter_by(story_id=story_id, chapter_id=chapter_id)
              .order_by(Comment.created_at.desc())
              .limit(100)
              .all())
-    return jsonify([c.serialize() for c in items]), 200
-
+    return jsonify([c.serialize(locale=loc) for c in items]), 200
 
 @api.route('/stories/<int:story_id>/chapters/<int:chapter_id>/comments', methods=['POST'])
 @jwt_required()
 def create_chapter_comment(story_id: int, chapter_id: int):
+    loc = _pick_locale()
     user = get_current_user()
     ch = Chapter.query.filter_by(id=chapter_id, story_id=story_id).first()
     if not ch or ch.deleted_at is not None:
@@ -568,7 +592,7 @@ def create_chapter_comment(story_id: int, chapter_id: int):
     )
     db.session.add(new_comment)
     db.session.commit()
-    return jsonify(new_comment.serialize()), 201
+    return jsonify(new_comment.serialize(locale=loc)), 201
 
 @api.route("/follows", methods=["GET"])
 def list_follows():
