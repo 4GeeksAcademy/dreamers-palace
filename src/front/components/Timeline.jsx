@@ -1,30 +1,56 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import examplecover from "../assets/img/dragon_cover.jpg";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
+
+const authHeader = () => {
+  const t = localStorage.getItem("token");
+  return t ? { Authorization: `Bearer ${t}` } : {};
+};
 
 export const Timeline = () => {
   const [stories, setStories] = useState([]);
   const [authorsById, setAuthorsById] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [catErr, setCatErr] = useState(null);
+
+  const [recent, setRecent] = useState([]); 
+  const [recentLoading, setRecentLoading] = useState(true);
+  const [recentErr, setRecentErr] = useState(null);
+
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const categorySlug = (params.get("category_slug") || "").trim().toLowerCase();
+
+  const me = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem("user") || "null"); }
+    catch { return null; }
+  }, []);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const resp = await fetch(`${API_BASE}/api/stories`, {
+        setErr(null);
+        setLoading(true);
+
+        const qParam = categorySlug ? `?category_slug=${encodeURIComponent(categorySlug)}` : "";
+        const resp = await fetch(`${API_BASE}/api/stories${qParam}`, {
           headers: { Accept: "application/json" },
         });
-        const ct = resp.headers.get("content-type");
+        const ct = resp.headers.get("content-type") || "";
 
         if (!resp.ok) {
-          const text = await resp.text();
+          const text = await resp.text().catch(() => "");
           throw new Error(`HTTP ${resp.status} — ${text.slice(0,120)}`);
         }
         if (!ct.includes("application/json")) {
-          const text = await resp.text();
+          const text = await resp.text().catch(() => "");
           throw new Error(`Non JSON response(${ct}). Start: ${text.slice(0,120)}`);
         }
 
@@ -62,8 +88,90 @@ export const Timeline = () => {
           }
           setAuthorsById(map);
         }
-      } catch {
+      } catch {}
+    })();
+  }, [categorySlug]);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        setCatErr(null);
+        setCatLoading(true);
+        const r = await fetch(`${API_BASE}/api/categories`, { headers: { Accept: "application/json" } });
+        const ct = r.headers.get("content-type") || "";
+        if (!r.ok) {
+          const t = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status} — ${t.slice(0,120)}`);
+        }
+        if (!ct.includes("application/json")) {
+          const t = await r.text().catch(() => "");
+          throw new Error(`Non JSON response (${ct}). Start: ${t.slice(0,120)}`);
+        }
+        const arr = await r.json();
+        if (!Array.isArray(arr)) throw new Error("Categories response is not a list");
+        setCategories(arr);
+      } catch (e) {
+        setCatErr(String(e.message || e));
+      } finally {
+        setCatLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setRecentErr(null);
+        setRecentLoading(true);
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setRecent([]);
+          return;
+        }
+
+        const r = await fetch(`${API_BASE}/api/user/me/recent-stories`, {
+          headers: { Accept: "application/json", ...authHeader() },
+        });
+        const ct = r.headers.get("content-type") || "";
+        if (!r.ok) {
+          if (r.status === 401) { setRecent([]); return; }
+          const t = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status} — ${t.slice(0,120)}`);
+        }
+        if (!ct.includes("application/json")) {
+          const t = await r.text().catch(() => "");
+          throw new Error(`Non JSON response (${ct}). Start: ${t.slice(0,120)}`);
+        }
+        const arr = await r.json();
+        if (!Array.isArray(arr)) throw new Error("Recent response is not a list");
+        if (arr.length === 0) { setRecent([]); return; }
+
+        const ids = [...new Set(arr.map(x => x.story_id).filter(Boolean))];
+        const detailPairs = await Promise.all(ids.map(async (sid) => {
+          try {
+            const rs = await fetch(`${API_BASE}/api/stories/${sid}`, { headers: { Accept: "application/json" } });
+            const cts = rs.headers.get("content-type") || "";
+            if (!rs.ok || !cts.includes("application/json")) return [sid, null];
+            return [sid, await rs.json()];
+          } catch { return [sid, null]; }
+        }));
+
+        const byId = {};
+        detailPairs.forEach(([sid, story]) => { byId[sid] = story; });
+
+        const merged = arr
+          .map(v => {
+            const story = byId[v.story_id];
+            return story ? { story, view_count: v.view_count } : null;
+          })
+          .filter(Boolean);
+
+        setRecent(merged);
+      } catch (e) {
+        setRecentErr(String(e.message || e));
+      } finally {
+        setRecentLoading(false);
       }
     })();
   }, []);
@@ -115,22 +223,51 @@ export const Timeline = () => {
             <div className="card my-3 sidebar-card">
               <div className="card-body">
                 <h5 className="card-title">Recently Viewed</h5>
-                <ul className="list-unstyled mb-0">
-                  <li>Story 1</li>
-                  <li>Story 2</li>
-                  <li>Story 3</li>
-                </ul>
+                {recentLoading && <div className="text-muted small">Loading…</div>}
+                {recentErr && <div className="text-danger small">Error: {recentErr}</div>}
+                {!recentLoading && recent.length === 0 && (
+                  <div className="text-muted small">No recent activity</div>
+                )}
+                {!recentLoading && recent.length > 0 && (
+                  <ul className="list-unstyled mb-0">
+                    {recent.slice(0, 5).map(({ story }) => (
+                      <li key={story.id}>
+                        <a
+                          href={`/story/${story.id}`}
+                          className="link-secondary text-decoration-none"
+                          onClick={(e) => openStory(e, story)}
+                        >
+                          {story.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
             <div className="card sidebar-card">
               <div className="card-body">
                 <h5 className="card-title">Categories</h5>
-                <ul className="list-unstyled mb-0">
-                  <li>Fiction</li>
-                  <li>Romance</li>
-                  <li>Historical</li>
-                </ul>
+                {catLoading && <div className="text-muted small">Loading…</div>}
+                {catErr && <div className="text-danger small">Error: {catErr}</div>}
+                {!catLoading && !catErr && categories.length === 0 && (
+                  <div className="text-muted small">No categories</div>
+                )}
+                {!catLoading && !catErr && categories.length > 0 && (
+                  <ul className="list-unstyled mb-0">
+                    {categories.map(c => (
+                      <li key={c.id}>
+                        <Link
+                          to={`/timeline?category_slug=${encodeURIComponent(c.slug)}`}
+                          className={`text-decoration-none ${categorySlug === c.slug ? "fw-semibold" : "link-secondary"}`}
+                        >
+                          {c.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </aside>
@@ -148,7 +285,7 @@ export const Timeline = () => {
 
               {!loading && !err && stories.length === 0 && (
                 <div className="text-center text-muted py-5">
-                  There are no published stories yet
+                  There are no published stories {categorySlug ? "for this category" : "yet"}
                 </div>
               )}
 

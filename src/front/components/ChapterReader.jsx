@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChapterCommentForm } from "./ChapterCommentForm";
 
@@ -15,6 +15,12 @@ export const ChapterReader = () => {
 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+
+  const postedViewRef = useRef(false);
+
+  useEffect(() => {
+    postedViewRef.current = false;
+  }, [storyId]);
 
   useEffect(() => {
     if (!storyId || !chapId) {
@@ -56,10 +62,11 @@ export const ChapterReader = () => {
         }
         const raw = await cResp.json();
         const list = Array.isArray(raw) ? raw : (raw?.items ?? raw?.data ?? raw?.results ?? []);
-        const activeOnly = list.filter(c => !c.deleted_at);
         if (!Array.isArray(list)) throw new Error("The response is not a list");
 
-        const sorted = [...list].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
+        const activeOnly = list.filter(c => !c.deleted_at);
+
+        const sorted = [...activeOnly].sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
         setChapters(sorted);
 
         const found = sorted.find(ch => Number(ch.id) === chapId);
@@ -71,6 +78,27 @@ export const ChapterReader = () => {
       }
     })();
   }, [storyId, chapId]);
+
+  useEffect(() => {
+    if (!story || !chapter) return;               
+    if (postedViewRef.current) return;            
+    const token = localStorage.getItem("token");
+    if (!token) return;                           
+
+    (async () => {
+      try {
+        await fetch(`${API_BASE}/api/stories/${storyId}/view`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        postedViewRef.current = true;
+      } catch {
+      }
+    })();
+  }, [storyId, story, chapter]);
 
   const { prevChapter, nextChapter } = useMemo(() => {
     if (!chapter || !Array.isArray(chapters) || chapters.length === 0) {
@@ -153,11 +181,9 @@ export const ChapterReader = () => {
                     </div>
                   </div>
 
-                  {/* Comentarios por capítulo */}
                   <div className="card shadow-sm mt-4">
                     <div className="card-body">
                       <h5 className="card-title mb-3">Comments</h5>
-                      {/* 👇 Asegúrate de pasar storyId y chapterId */}
                       <ChapterCommentForm storyId={storyId} chapterId={chapId} />
                     </div>
                   </div>
