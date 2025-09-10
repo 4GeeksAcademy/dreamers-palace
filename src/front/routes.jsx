@@ -14,7 +14,6 @@ import { StoryPage } from "./pages/Story";
 import { StoryCreation } from "./components/StoryCreation";
 import { ChapterCreation } from "./components/ChapterCreation";
 import { ChapterPage } from "./pages/Chapter";
-// import { WriterPage } from "./pages/Writer"; // ⬅️ quítala si ya no la usas
 import { WriterProfile } from "./components/WriterProfile";
 import { FollowingWritter } from "./pages/Following";
 import { LoginPage } from "./pages/LoginPage";
@@ -26,7 +25,7 @@ import { CapituloO } from "./pages/CapituloO";
 import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
-import { WriterProfileEdit } from "./components/WriterProfileEdit"; // ✅ IMPORT
+import { WriterProfileEdit } from "./components/WriterProfileEdit"; 
 
 export const router = createBrowserRouter(
   createRoutesFromElements(

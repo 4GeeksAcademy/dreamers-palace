@@ -18,7 +18,6 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 def _pick_locale() -> str:
-    # ?locale=es  o header Accept-Language: "es-CL,es;q=0.9,en;q=0.8"
     loc = (request.args.get("locale") or "").strip()
     if not loc:
         al = (request.headers.get("Accept-Language") or "").split(",")[0]
@@ -289,9 +288,37 @@ def list_stories():
     list_order = q.order_by(Story.published_at.desc().nulls_last(), Story.id.desc())
     pag = list_order.paginate(page=page, per_page=per_page, error_out=False)
 
+    story_ids = [s.id for s in pag.items]
+
+    if story_ids:
+        comment_counts = dict(
+            db.session.query(Comment.story_id, func.count(Comment.id))
+            .filter(Comment.story_id.in_(story_ids), Comment.deleted_at.is_(None))
+            .group_by(Comment.story_id)
+            .all()
+        )
+        view_counts = dict(
+            db.session.query(StoryView.story_id, func.coalesce(func.sum(StoryView.view_count), 0))
+            .filter(StoryView.story_id.in_(story_ids))
+            .group_by(StoryView.story_id)
+            .all()
+        )
+    else:
+        comment_counts = {}
+        view_counts = {}
+
     return jsonify({
-        "items": [s.serialize(locale=loc) for s in pag.items],
-        "page": pag.page, "per_page": pag.per_page, "total": pag.total
+        "items": [
+            dict(
+                s.serialize(locale=loc),
+                comments_count=int(comment_counts.get(s.id, 0) or 0),
+                views_count=int(view_counts.get(s.id, 0) or 0),
+            )
+            for s in pag.items
+        ],
+        "page": pag.page,
+        "per_page": pag.per_page,
+        "total": pag.total
     })
 
 @api.route('/stories/<int:story_id>', methods=['GET'])

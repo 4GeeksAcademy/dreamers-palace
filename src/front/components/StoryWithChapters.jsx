@@ -69,7 +69,7 @@ export const StoryWithChapters = () => {
       }
     })();
 
-    return () => abort.abort();
+  return () => abort.abort();
   }, [id]);
 
   async function handleDeleteChapter(chapterId) {
@@ -137,7 +137,7 @@ export const StoryWithChapters = () => {
                   <div className="card-body">
                     <div className="d-flex align-items-start justify-content-between">
                       <div>
-                        <h2 className="mb-1">{story.title}</h2>git 
+                        <h2 className="mb-1">{story.title}</h2>
                       </div>
 
                       {!isOwnerOrAdmin && (
@@ -151,7 +151,9 @@ export const StoryWithChapters = () => {
                     </div>
 
                     <p className="mt-3 mb-2">{story.synopsis || "Synopsis unavailable."}</p>
-                    <div className="small text-secondary">Last updated {story.updated_at}</div>
+                    <div className="small text-secondary">
+                      Last updated {story.updated_at_human || story.updated_at}
+                    </div>
 
                     {Array.isArray(story.tags) && story.tags.length > 0 && (
                       <div className="mt-2">
@@ -204,7 +206,7 @@ export const StoryWithChapters = () => {
                             )}
                           </div>
                           <div className="small text-secondary">
-                            Status: {c.status} • Updated {c.updated_at}
+                            Status: {c.status} • Updated {c.updated_at_human || c.updated_at}
                           </div>
                         </div>
 
@@ -253,9 +255,13 @@ export const StoryWithChapters = () => {
                   {story.category?.name && (
                     <div><strong>Category:</strong> {story.category.name}</div>
                   )}
-                  <div><strong>Created:</strong> {story.created_at}</div>
+                  <div><strong>Created:</strong> {story.created_at_human || story.created_at}</div>
+                  <div><strong>Updated:</strong> {story.updated_at_human || story.updated_at}</div>
                   {story.published_at && (
-                    <div><strong>Published:</strong> {story.published_at}</div>
+                    <div><strong>Published:</strong> {story.published_at_human || story.published_at}</div>
+                  )}
+                  {story.deleted_at && (
+                    <div><strong>Deleted:</strong> {story.deleted_at_human || story.deleted_at}</div>
                   )}
                 </div>
               </div>

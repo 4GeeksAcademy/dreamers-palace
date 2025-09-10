@@ -342,7 +342,7 @@ export const Timeline = () => {
                             </p>
                             <p className="card-text">
                               <small className="text-body-secondary">
-                                Last updated {s.updated_at}
+                                Last updated {s.updated_at_human || s.updated_at}
                               </small>
                             </p>
                             {Array.isArray(s.tags) && s.tags.map((t) => {

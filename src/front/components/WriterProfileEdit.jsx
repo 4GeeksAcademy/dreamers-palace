@@ -24,6 +24,9 @@ export const WriterProfileEdit = () => {
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
 
+  const [createdAtHuman, setCreatedAtHuman] = useState("");
+  const [updatedAtHuman, setUpdatedAtHuman] = useState("");
+
   useEffect(() => {
     (async () => {
       if (!localStorage.getItem("token")) {
@@ -50,6 +53,9 @@ export const WriterProfileEdit = () => {
         setDisplayName(u.display_name || "");
         setBio(u.bio || "");
         setLocation(u.location || "");
+
+        setCreatedAtHuman(u.created_at_human || u.created_at || "");
+        setUpdatedAtHuman(u.updated_at_human || u.updated_at || "");
       } catch (e) {
         setErr(String(e.message || e));
       } finally {
@@ -118,6 +124,12 @@ export const WriterProfileEdit = () => {
                   Back to profile
                 </Link>
               </div>
+
+              {(createdAtHuman || updatedAtHuman) && (
+                <div className="text-muted small mb-3">
+                  Joined {createdAtHuman || "—"} • Last updated {updatedAtHuman || "—"}
+                </div>
+              )}
 
               {err && <div className="alert alert-danger">Error: {err}</div>}
               {ok && <div className="alert alert-success">{ok}</div>}

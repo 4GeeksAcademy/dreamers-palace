@@ -160,7 +160,7 @@ export const ChapterCommentForm = ({ storyId, chapterId }) => {
               <li key={c.id} className="list-group-item">
                 <div className="d-flex justify-content-between">
                   <strong>{name}</strong>
-                  <small className="text-muted">{c.created_at}</small>
+                  <small className="text-muted">{c.created_at_human || c.created_at}</small>
                 </div>
                 <div style={{ whiteSpace: "pre-wrap" }}>{c.text}</div>
               </li>

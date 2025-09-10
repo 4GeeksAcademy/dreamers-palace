@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChapterCommentForm } from "./ChapterCommentForm";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
@@ -80,10 +82,10 @@ export const ChapterReader = () => {
   }, [storyId, chapId]);
 
   useEffect(() => {
-    if (!story || !chapter) return;               
-    if (postedViewRef.current) return;            
+    if (!story || !chapter) return;
+    if (postedViewRef.current) return;
     const token = localStorage.getItem("token");
-    if (!token) return;                           
+    if (!token) return;
 
     (async () => {
       try {
@@ -152,8 +154,10 @@ export const ChapterReader = () => {
                     )}
                   </div>
 
-                  <article style={{ whiteSpace: "pre-wrap" }}>
-                    {chapter.content || "No content."}
+                  <article className="markdown-body">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {chapter.content || ""}
+                    </ReactMarkdown>
                   </article>
 
                   <hr className="my-4" />
