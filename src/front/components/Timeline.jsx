@@ -258,7 +258,7 @@ export const Timeline = () => {
               {!loading &&
                 !err &&
                 stories.map((s) => {
-                  const cover = s.cover_url || examplecover;
+                  const cover = cover_url || "/images/default.jpg";
                   const author = authorsById[s.author_id];
                   const authorName = author?.display_name || "Unknown author";
                   return (

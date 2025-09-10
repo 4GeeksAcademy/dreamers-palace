@@ -74,10 +74,12 @@ export const StoryCreation = () => {
       method: 'POST',
       body: imageForm
     })
-    const data = await resp.json
-
-    console.log(data)
+    const data = await resp.json()
+        if (data.secure_url) {
+          setImageUrl(data.secure_url); // Guarda la URL subida
+          console.log("Uploaded image URL:", data.secure_url);
   }
+};
 
   useEffect(() => {
     (async () => {
