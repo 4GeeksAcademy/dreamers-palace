@@ -224,7 +224,7 @@ export const StoryCreation = () => {
                     onChange={(e) => setTagsInput(e.target.value)}
                   />
                   <div className="form-text">
-                    Separa con comas. Ej: <em>fantasy, medieval, dragons</em>
+                    Space tags with commas Ex: <em>fantasy, medieval, dragons</em>
                   </div>
                 </div>
 

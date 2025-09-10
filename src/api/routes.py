@@ -270,6 +270,7 @@ def list_stories():
     category_id = request.args.get("category_id", type=int)
     category_slug = (request.args.get("category_slug") or "").strip().lower()
     tag_slug = (request.args.get("tag") or "").strip().lower()
+    query_str = (request.args.get("q") or "").strip()
 
     q = Story.query
 
@@ -284,6 +285,13 @@ def list_stories():
 
     if tag_slug:
         q = q.join(Story.tags).filter(Tag.slug == tag_slug)
+
+    if query_str:
+        like = f"%{query_str}%"
+        q = q.filter(or_(
+            Story.title.ilike(like),
+            Story.synopsis.ilike(like)
+        ))
 
     list_order = q.order_by(Story.published_at.desc().nulls_last(), Story.id.desc())
     pag = list_order.paginate(page=page, per_page=per_page, error_out=False)

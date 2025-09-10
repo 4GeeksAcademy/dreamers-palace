@@ -27,6 +27,9 @@ export const Timeline = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const categorySlug = (params.get("category_slug") || "").trim().toLowerCase();
+  const query = (params.get("q") || "").trim();
+
+  const [search, setSearch] = useState(query);
 
   const me = useMemo(() => {
     try { return JSON.parse(localStorage.getItem("user") || "null"); }
@@ -34,13 +37,21 @@ export const Timeline = () => {
   }, []);
 
   useEffect(() => {
+    setSearch(query);
+  }, [query]);
+
+  useEffect(() => {
     const load = async () => {
       try {
         setErr(null);
         setLoading(true);
 
-        const qParam = categorySlug ? `?category_slug=${encodeURIComponent(categorySlug)}` : "";
-        const resp = await fetch(`${API_BASE}/api/stories${qParam}`, {
+        const qp = new URLSearchParams();
+        if (categorySlug) qp.set("category_slug", categorySlug);
+        if (query) qp.set("q", query);
+
+        const url = `${API_BASE}/api/stories${qp.toString() ? `?${qp.toString()}` : ""}`;
+        const resp = await fetch(url, {
           headers: { Accept: "application/json" },
         });
         const ct = resp.headers.get("content-type") || "";
@@ -90,7 +101,7 @@ export const Timeline = () => {
         }
       } catch {}
     })();
-  }, [categorySlug]);
+  }, [categorySlug, query]);
 
   useEffect(() => {
     (async () => {
@@ -181,6 +192,14 @@ export const Timeline = () => {
     navigate(`/story/${s.id}`);
   };
 
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    const qp = new URLSearchParams();
+    if (categorySlug) qp.set("category_slug", categorySlug);
+    if (search.trim()) qp.set("q", search.trim());
+    navigate(`/timeline${qp.toString() ? `?${qp.toString()}` : ""}`);
+  };
+
   return (
     <div>
       <main className="container-fluid">
@@ -225,7 +244,7 @@ export const Timeline = () => {
                     {categories.map(c => (
                       <li key={c.id}>
                         <Link
-                          to={`/timeline?category_slug=${encodeURIComponent(c.slug)}`}
+                          to={`/timeline?category_slug=${encodeURIComponent(c.slug)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
                           className={`text-decoration-none ${categorySlug === c.slug ? "fw-semibold" : "link-secondary"}`}
                         >
                           {c.name}
@@ -240,6 +259,25 @@ export const Timeline = () => {
 
           <section className="col-12 col-md-9 col-lg-10">
             <div className="bg-white rounded-3 p-3">
+              <form onSubmit={onSearchSubmit} className="mb-3">
+                <div className="input-group">
+                  <input
+                    type="search"
+                    className="form-control"
+                    placeholder="Search stories…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <button className="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+                {(categorySlug || query) && (
+                  <div className="form-text">
+                    {categorySlug && <>Category: <strong>{categorySlug}</strong>{query ? " • " : ""}</>}
+                    {query && <>Query: <strong>{query}</strong></>}
+                  </div>
+                )}
+              </form>
+
               {loading && (
                 <div className="text-center py-5">Loading stories</div>
               )}
@@ -251,7 +289,7 @@ export const Timeline = () => {
 
               {!loading && !err && stories.length === 0 && (
                 <div className="text-center text-muted py-5">
-                  There are no published stories {categorySlug ? "for this category" : "yet"}
+                  There are no published stories {categorySlug ? "for this category" : (query ? "matching your search" : "yet")}
                 </div>
               )}
 
