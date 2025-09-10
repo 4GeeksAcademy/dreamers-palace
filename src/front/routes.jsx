@@ -1,9 +1,4 @@
-// router.jsx
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
+import {createBrowserRouter,createRoutesFromElements,Route,} from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
@@ -50,7 +45,8 @@ export const router = createBrowserRouter(
       <Route path="/visitor" element={<VisitorPage />} />
       <Route path="/libro" element={<Libro />} />
       <Route path="/capituloO" element={<CapituloO />} />
-      <Route path="/writerpage" element={<WriterProfileEdit />} />
+      <Route path="/writerpage" element={<WriterProfile />} />
+      <Route path="/writerpage/edit" element={<WriterProfileEdit />} />
     </Route>
   )
 );

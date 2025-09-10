@@ -176,43 +176,9 @@ export const Timeline = () => {
     })();
   }, []);
 
-  const openStory = async (e, s) => {
+  const openStory = (e, s) => {
     e.preventDefault();
-
-    let me = null;
-    try { me = JSON.parse(localStorage.getItem("user") || "null"); } catch {}
-
-    if ((me?.user_role === "WRITER" || me?.user_role === "ADMIN") && me?.id === s.author_id) {
-      navigate(`/story/${s.id}`);
-      return;
-    }
-
-    try {
-      const resp = await fetch(`${API_BASE}/api/stories/${s.id}/chapters`, {
-        headers: { Accept: "application/json" },
-      });
-      const ct = resp.headers.get("content-type") || "";
-      if (!resp.ok) {
-        const text = await resp.text().catch(() => "");
-        throw new Error(`HTTP ${resp.status} — ${text.slice(0,120)}`);
-      }
-      if (!ct.includes("application/json")) {
-        const text = await resp.text().catch(() => "");
-        throw new Error(`Non JSON response (${ct}). Start: ${text.slice(0,120)}`);
-      }
-      const chapters = await resp.json();
-      const published = Array.isArray(chapters)
-        ? (chapters.find(c => c.status === "PUBLISHED") || chapters[0])
-        : null;
-
-      if (published?.id) {
-        navigate(`/story/${s.id}/chapters/${published.id}`);
-      } else {
-        navigate(`/story/${s.id}`);
-      }
-    } catch {
-      navigate(`/story/${s.id}`);
-    }
+    navigate(`/story/${s.id}`);
   };
 
   return (

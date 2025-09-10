@@ -215,7 +215,7 @@ export const WriterProfile = () => {
             <Link to="/login" className="btn btn-outline-primary">Sign in to follow</Link>
           )
         )}
-        {isOwnProfile && <Link to="/writerpage" className="btn btn-primary">Edit Profile</Link>}
+        {isOwnProfile && <Link to="/writerpage/edit" className="btn btn-primary">Edit Profile</Link>}
       </div>
     </div>
 
@@ -283,7 +283,9 @@ export const WriterProfile = () => {
                         <Link to={`/story/${s.id}`} className="text-decoration-none">{s.title}</Link>
                       </h5>
                       <p className="card-text small mb-1">{s.synopsis || "Sinopsis no disponible."}</p>
-                      <small className="text-body-secondary d-block mb-1">Last updated {s.updated_at}</small>
+                      <small className="text-body-secondary d-block mb-1">
+                        Last updated {s.updated_at_human || s.updated_at}
+                      </small>
                       {Array.isArray(s.tags) && s.tags.map((t) => {
                         const tagId = t?.id ?? t?.slug ?? String(t);
                         const tagName = t?.name ?? String(t);

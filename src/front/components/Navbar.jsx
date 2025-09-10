@@ -32,7 +32,7 @@ export const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-md glass" data-bs-theme="light">
       <div className="container-fluid">
-        <Link to="/" className="navbar-brand d-flex align-items-center">
+        <Link to="/timeline" className="navbar-brand d-flex align-items-center">
           <img src={navbarlogo} alt="Logo" style={{ height: "56px" }} />
         </Link>
 
@@ -52,7 +52,6 @@ export const Navbar = () => {
           <ul className="navbar-nav me-auto mb-2 mb-md-0"></ul>
 
           <div className="d-flex align-items-center gap-2">
-            <button className="btn btn-primary btn-sm">Languages</button>
 
             {user ? (
               <>
