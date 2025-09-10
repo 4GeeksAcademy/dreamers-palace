@@ -258,7 +258,7 @@ export const Timeline = () => {
               {!loading &&
                 !err &&
                 stories.map((s) => {
-                  const cover = cover_url || "/images/default.jpg";
+                  const cover = s.cover_url || "/images/default.jpg";
                   const author = authorsById[s.author_id];
                   const authorName = author?.display_name || "Unknown author";
                   return (
@@ -269,11 +269,9 @@ export const Timeline = () => {
                     >
                       <div className="row g-0">
                         <div className="col-12 col-md-4">
-                          <img
-                            src={cover}
-                            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
-                            alt={`${s.title} cover`}
-                          />
+            src={cover}
+            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+            alt={`${s.title} cover`}
                         </div>
                         <div className="col-12 col-md-8">
                           <div className="card-body">

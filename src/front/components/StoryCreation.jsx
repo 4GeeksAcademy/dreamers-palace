@@ -62,6 +62,7 @@ export const StoryCreation = () => {
   const navigate = useNavigate();
 
   const [image, setImage] = useState(null)
+  const [imageUrl, setImageUrl] = useState("");
 
   const uploadImageToCloudinary = async (evt) => {
     
@@ -116,6 +117,7 @@ export const StoryCreation = () => {
         synopsis: storysynopsis,
         category_id,
         tags,
+        cover_url: imageUrl,
       });
 
       if (visibility === "published") {
