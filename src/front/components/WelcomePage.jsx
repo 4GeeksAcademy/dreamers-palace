@@ -55,8 +55,12 @@ export const WelcomePage = () => {
                 />
             </div>
             </div>
-                <h2>Empezar a escribir</h2>
-                <button type="button" className="btn btn-primary  btn-lg">Escribir</button>
+                <h2>Abre tu mente </h2>
+               
+                <Link to="/story/new" className="btn btn-primary btn-lg">
+                 Empezar a escribir
+                </Link>
+               
             </div>
             <div className="p-2 flex-fill">
                <div className="row g-0">
@@ -86,7 +90,13 @@ export const WelcomePage = () => {
             </div>
             </div>
                 <h2>Login</h2>
-                <button type="button" className="btn btn-primary  btn-lg">crea tu perfil</button>
+               
+                <Link to="/login" className="btn btn-primary btn-lg">
+                      crea tu perfil
+
+                 </Link>
+                   
+               
             </div>
         </div>
 
