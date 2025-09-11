@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-
+import apple from "./../assets/img/apple.jpg";
+import pen from "./../assets/img/pen.jpg";
+import leer from "./../assets/img/book-leer.jpg";
 export const WelcomePage = () => {
     return (<>
 
@@ -8,7 +10,7 @@ export const WelcomePage = () => {
 
         </div>
         <div className="content d-flex justify-content-center text-white">
-            <h1>Hola, bienvenidos a Dreamers Palace Donde las historias cobran vida</h1>
+            <h3>Hola, bienvenidos a Dreamers Palace Donde las historias cobran vida</h3>
 
 
         </div>
@@ -43,45 +45,63 @@ export const WelcomePage = () => {
         <div className="d-flex">
             <div className="p-2 flex-fill">
 
-                <img src="michi-escritor.png.jpeg" className="img-top rounded-circle" height="200" />
+            <div className="row g-0">
+            <div className="col-12 col-md-">
+
+                <img
+                    src={pen}
+                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+
+                />
+            </div>
+            </div>
                 <h2>Empezar a escribir</h2>
                 <button type="button" className="btn btn-primary  btn-lg">Escribir</button>
             </div>
             <div className="p-2 flex-fill">
-                <img src="michi-lector.png.jpeg" className="img-top rounded-circle" height="200" />
+               <div className="row g-0">
+            <div className="col-12 col-md-">
+
+                <img
+                    src={leer}
+                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+
+                />
+            </div>
+            </div>
                 <h2>Historias</h2>
                 <button type="button" className="btn btn-primary  btn-lg">Comenzar a leer </button>
             </div>
 
             <div className="p-2 flex-fill">
 
-                <img src="michi-avatar.jpeg.jpeg" className="img-top rounded-circle" height="200" />
+                <div className="row g-0">
+            <div className="col-12 col-md-">
+
+                <img
+                    src={apple}
+                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+
+                />
+            </div>
+            </div>
                 <h2>Login</h2>
                 <button type="button" className="btn btn-primary  btn-lg">crea tu perfil</button>
             </div>
         </div>
 
+
+          
         <div className="demo-content">
-            <div className="container-fluid" style={{paddingTop: "20px"}}>
+            <div className="container-fluid" style={{ paddingTop: "20px" }}>
                 <div className="row">
                     <div className="col-12">
 
 
                         <div className="jumbotron-glass">
-                            <div className="book-decoration">📖</div>
+                            <div className="book-decoration"></div>
                             <div className="container">
-                                <div className="jumbotron-overlay text-center">
-                                    <h1 className="hero-title">Dreamers Palace</h1>
-                                    <p className="hero-subtitle">
-                                        "Un reino donde los sueños cobran vida a través de las páginas.
-                                        Descubre reseñas, recomendaciones y el fascinante mundo de la literatura
-                                        que despierta tu imaginación."
-                                    </p>
-                                    <div className="d-flex gap-3 justify-content-center flex-wrap">
-                                        <a href="#" className="btn btn-primary-glass btn-hero">Explorar Reseñas</a>
-                                        <a href="#" className="btn btn-outline-glass btn-hero">Libros Recomendados</a>
-                                    </div>
-                                </div>
+                               
                             </div>
                         </div>
                     </div>
@@ -143,12 +163,12 @@ export const WelcomePage = () => {
                             <div className="row mt-5">
                                 <div className="col-12">
                                     <div className="quote-section p-4">
-                                        <h4 className="section-title mb-3">📖 Cita del Día</h4>
+                                        <h4 className="section-title mb-3">Cita del Día</h4>
                                         <blockquote className="blockquote text-center mb-0">
-                                            <p className="mb-3" style={{fontFamily: "Crimson Text, serif", fontStyle: "italic", fontSize: "1.2rem", color: "#000000"}}>
+                                            <p className="mb-3" style={{ fontFamily: "Crimson Text, serif", fontStyle: "italic", fontSize: "1.2rem", color: "#000000" }}>
                                                 "Los libros son espejos: solo se ve en ellos lo que uno ya lleva dentro."
                                             </p>
-                                            <footer className="blockquote-footer" style={{color: "#333333"}}>
+                                            <footer className="blockquote-footer" style={{ color: "#333333" }}>
                                                 Carlos Ruiz Zafón
                                             </footer>
                                         </blockquote>
