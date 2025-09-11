@@ -102,6 +102,7 @@ class Story(db.Model):
     author_id: Mapped[int] = mapped_column(db.ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     synopsis: Mapped[str] = mapped_column(String(200), nullable=False)
+    cover_url: Mapped[str] = mapped_column(String(200), nullable=True)
     status: Mapped[StoryStatus] = mapped_column(
         db.Enum(
             StoryStatus,
@@ -142,6 +143,7 @@ class Story(db.Model):
             "updated_at_human": _human(self.updated_at, locale),
             "deleted_at_human": _human(self.deleted_at, locale),
             "category": self.category.serialize() if self.category else None,
+            "cover_url": self.cover_url if self.cover_url else "",
             "tags": [t.serialize() for t in self.tags],
         }
 
