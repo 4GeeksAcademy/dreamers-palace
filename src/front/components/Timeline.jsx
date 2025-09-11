@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import examplecover from "../assets/img/dragon_cover.jpg";
+import examplecover from "/images/Default.jpg";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
@@ -306,12 +306,12 @@ export const Timeline = () => {
                       key={s.id}
                     >
                       <div className="row g-0">
-                        <div className="col-12 col-md-4">
-                          <img
-                            src={cover}
-                            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
-                            alt={`${s.title} cover`}
-                          />
+                      <div className="col-12 col-md-4">
+                        <img
+                          src={cover}
+                          className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+                          alt={`${s.title} cover`}
+                        />
                         </div>
                         <div className="col-12 col-md-8">
                           <div className="card-body">

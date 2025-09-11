@@ -223,13 +223,14 @@ def create_story():
     data = request.get_json() or {}
     title = (data.get("title") or "").strip()
     synopsis = (data.get("synopsis") or "").strip()
+    cover_url = (data.get("cover_url") or "").strip()
     category_id = data.get("category_id")
     in_tags = data.get("tags") 
 
     if not title:
         return jsonify({"error": "title_required"}), 400
 
-    new_story = Story(author_id=user.id, title=title, synopsis=synopsis)
+    new_story = Story(author_id=user.id, title=title, synopsis=synopsis, cover_url=cover_url)
 
     if category_id is not None:
         try:

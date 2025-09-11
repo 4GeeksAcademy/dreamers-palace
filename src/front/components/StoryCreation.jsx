@@ -61,23 +61,24 @@ export const StoryCreation = () => {
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
 
-  const [image, setImage] = useState(null)
+  const [image, setImage] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState("");
 
   const uploadImageToCloudinary = async (evt) => {
     
     evt.preventDefault()
     const imageForm = new FormData()
     imageForm.append("file",image)
-    imageForm.append("upload_preset", "Dreamers Palace") 
+    imageForm.append("upload_preset", "Dreamers_Palace") 
 
     const resp = await fetch('https://api.cloudinary.com/v1_1/dkcyznoxl/image/upload', {
       method: 'POST',
       body: imageForm
     })
-    const data = await resp.json
-
-    console.log(data)
-  }
+    const data = await resp.json()
+      console.log(data)
+      setUploadedImage(data.url)
+};
 
   useEffect(() => {
     (async () => {
@@ -114,6 +115,7 @@ export const StoryCreation = () => {
         synopsis: storysynopsis,
         category_id,
         tags,
+        cover_url: uploadedImage,
       });
 
       if (visibility === "published") {
