@@ -21,11 +21,12 @@ import { StoryWithChapters } from "./components/StoryWithChapters";
 import { ChapterReader } from "./components/ChapterReader";
 import { ChapterEdit } from "./components/ChapterEdit";
 import { WriterProfileEdit } from "./components/WriterProfileEdit"; 
+import { WelcomePage } from "./components/WelcomePage";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={<WelcomePage />} />
       <Route path="/single/:theId" element={<Single />} />
       <Route path="/demo" element={<Demo />} />
       <Route path="/welcome" element={<Welcome />} />
