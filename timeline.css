@@ -52,16 +52,16 @@ main {
 
 .dropdown-menu {
   position: absolute;
-  z-index: 1100 !important;
+  z-index: 1100 !important; 
+}
 
 .navbar, .navbar .container-fluid {
   position: relative;
   z-index: 1100;
 }
 
+
 form input[type="search"], form .input-group {
   position: relative;
   z-index: 1;
-}
-
 }
