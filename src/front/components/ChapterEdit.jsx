@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const API_BASE = (import.meta.env.VITE_BACKEND_URL || "");
 
@@ -46,8 +48,10 @@ export const ChapterEdit = () => {
   const [number, setNumber] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("DRAFT");
-
   const [storyTitle, setStoryTitle] = useState("");
+
+  const [activeTab, setActiveTab] = useState("edit");
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     const abort = new AbortController();
@@ -57,16 +61,13 @@ export const ChapterEdit = () => {
         setErr(null);
         setLoading(true);
 
-        // 1) Cargar historia (pública)
         const story = await jsonFetch(`/api/stories/${id}`, { signal: abort.signal });
         setStoryTitle(story?.title || "");
 
-        // 2) Verificar permisos: autor o admin
         const isOwnerOrAdmin =
           !!me && (me.id === story.author_id || me.user_role === "ADMIN");
 
         if (!isOwnerOrAdmin) {
-          // Redirigir a lector (o al primer capítulo publicado si existe)
           try {
             const chs = await jsonFetch(`/api/stories/${id}/chapters`, { signal: abort.signal });
             const published = Array.isArray(chs)
@@ -81,7 +82,6 @@ export const ChapterEdit = () => {
           return;
         }
 
-        // 3) Cargar capítulo con Authorization (puede estar en DRAFT)
         const ch = await jsonFetch(`/api/stories/${id}/chapters/${chapterId}`, {
           headers: { ...authHeader() },
           signal: abort.signal,
@@ -98,7 +98,59 @@ export const ChapterEdit = () => {
     })();
 
     return () => abort.abort();
-  }, [id, chapterId, me]);
+  }, [id, chapterId, me, navigate]);
+
+  const insertAroundSelection = (before, after = "", placeholder = "") => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? content.length;
+    const end = el.selectionEnd ?? content.length;
+    const hasSelection = start !== end;
+    const selected = content.slice(start, end);
+    const inner = hasSelection ? selected : placeholder;
+    const next = content.slice(0, start) + before + inner + after + content.slice(end);
+    setContent(next);
+
+    requestAnimationFrame(() => {
+      el.focus();
+      const cursor = start + before.length + inner.length;
+      el.setSelectionRange(cursor, cursor);
+    });
+  };
+
+  const insertPrefixOnLine = (prefix) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+
+    const before = content.slice(0, start);
+    const lineStart = before.lastIndexOf("\n") + 1;
+    const next =
+      content.slice(0, lineStart) +
+      prefix +
+      content.slice(lineStart);
+
+    setContent(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      const delta = prefix.length;
+      el.setSelectionRange(start + delta, end + delta);
+    });
+  };
+
+  const onBold = () => insertAroundSelection("**", "**", "bold text");
+  const onItalic = () => insertAroundSelection("*", "*", "italic text");
+  const onStrike = () => insertAroundSelection("~~", "~~", "strikethrough");
+  const onCodeInline = () => insertAroundSelection("`", "`", "code");
+  const onCodeBlock = () => insertAroundSelection("\n```\n", "\n```\n", "code block");
+  const onQuote = () => insertPrefixOnLine("> ");
+  const onH1 = () => insertPrefixOnLine("# ");
+  const onH2 = () => insertPrefixOnLine("## ");
+  const onH3 = () => insertPrefixOnLine("### ");
+  const onUl = () => insertPrefixOnLine("- ");
+  const onOl = () => insertPrefixOnLine("1. ");
+  const onLink = () => insertAroundSelection("[", "](https://)", "link text");
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -199,17 +251,71 @@ export const ChapterEdit = () => {
                     </div>
                   </div>
 
-                  <div className="mt-3">
-                    <label className="form-label">Content</label>
-                    <textarea
-                      className="form-control"
-                      rows={12}
-                      placeholder="Write your chapter content…"
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      required
-                    />
-                  </div>
+                  <ul className="nav nav-tabs mt-4">
+                    <li className="nav-item">
+                      <button
+                        type="button"
+                        className={`nav-link ${activeTab === "edit" ? "active" : ""}`}
+                        onClick={() => setActiveTab("edit")}
+                      >
+                        Edit
+                      </button>
+                    </li>
+                    <li className="nav-item">
+                      <button
+                        type="button"
+                        className={`nav-link ${activeTab === "preview" ? "active" : ""}`}
+                        onClick={() => setActiveTab("preview")}
+                      >
+                        Preview
+                      </button>
+                    </li>
+                  </ul>
+
+                  {activeTab === "edit" && (
+                    <div className="d-flex flex-wrap gap-2 mt-3 mb-2">
+                      <button type="button" className="btn btn-sm btn-light" onClick={onBold}><strong>B</strong></button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onItalic}><em>I</em></button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onStrike}><span style={{textDecoration:"line-through"}}>S</span></button>
+                      <span className="vr" />
+                      <button type="button" className="btn btn-sm btn-light" onClick={onH1}>H1</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onH2}>H2</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onH3}>H3</button>
+                      <span className="vr" />
+                      <button type="button" className="btn btn-sm btn-light" onClick={onUl}>• List</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onOl}>1. List</button>
+                      <span className="vr" />
+                      <button type="button" className="btn btn-sm btn-light" onClick={onQuote}>&gt; Quote</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onLink}>Link</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onCodeInline}>`code`</button>
+                      <button type="button" className="btn btn-sm btn-light" onClick={onCodeBlock}>``` code</button>
+                    </div>
+                  )}
+
+                  {activeTab === "edit" ? (
+                    <div className="mt-3">
+                      <label className="form-label">Content</label>
+                      <textarea
+                        ref={textareaRef}
+                        className="form-control"
+                        rows={12}
+                        placeholder="Write your chapter content…"
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        maxLength={600}
+                        required
+                      />
+                      <div className="form-text">{content.length}/600</div>
+                    </div>
+                  ) : (
+                    <div className="mt-3">
+                      <div className="border rounded p-3 bg-light" style={{ minHeight: 200 }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {content || "*Nothing to preview…*"}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="d-flex gap-2 mt-4">
                     <button className="btn btn-primary" type="submit" disabled={saving}>

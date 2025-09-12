@@ -45,6 +45,19 @@ export const StoryWithChapters = () => {
   const [err, setErr] = useState(null);
   const [deleting, setDeleting] = useState(new Set());
 
+  // ---- Edición de historia ----
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editSynopsis, setEditSynopsis] = useState("");
+  const [editStatus, setEditStatus] = useState("DRAFT");
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editErr, setEditErr] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCats, setLoadingCats] = useState(false);
+  // -----------------------------
+  const [deletingStory, setDeletingStory] = useState(false);
+
   const isOwnerOrAdmin = !!(me && story && (me.id === story.author_id || me.user_role === "ADMIN"));
 
   useEffect(() => {
@@ -69,8 +82,95 @@ export const StoryWithChapters = () => {
       }
     })();
 
-  return () => abort.abort();
+    return () => abort.abort();
   }, [id]);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    let ignore = false;
+    (async () => {
+      try {
+        setLoadingCats(true);
+        const r = await fetch(`${API_BASE}/api/categories`, { headers: { Accept: "application/json" } });
+        const ct = r.headers.get("content-type") || "";
+        if (!r.ok) {
+          const t = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status} — ${t.slice(0,120)}`);
+        }
+        if (!ct.includes("application/json")) {
+          const t = await r.text().catch(() => "");
+          throw new Error(`Non JSON response (${ct}). Start: ${t.slice(0,120)}`);
+        }
+        const arr = await r.json();
+        if (!ignore) setCategories(Array.isArray(arr) ? arr : []);
+      } catch {
+        if (!ignore) setCategories([]);
+      } finally {
+        if (!ignore) setLoadingCats(false);
+      }
+    })();
+    return () => { ignore = true; };
+  }, [isEditing]);
+
+  function beginEdit() {
+    if (!story) return;
+    setEditTitle(story.title || "");
+    setEditSynopsis(story.synopsis || "");
+    setEditStatus(story.status || "DRAFT");
+    setEditCategoryId(story.category?.id ?? "");
+    setEditErr(null);
+    setIsEditing(true);
+  }
+
+  function cancelEdit() {
+    setIsEditing(false);
+    setEditErr(null);
+  }
+
+  async function saveEdit(e) {
+    e.preventDefault();
+    setEditErr(null);
+
+    const title = editTitle.trim();
+    const synopsis = editSynopsis.trim();
+    if (!title) {
+      setEditErr("Title is required");
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      const payload = {
+        title,
+        synopsis,
+        status: editStatus === "PUBLISHED" ? "PUBLISHED" : "DRAFT",
+        category_id: editCategoryId === "" ? null : Number(editCategoryId),
+      };
+
+      const r = await fetch(`${API_BASE}/api/stories/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Accept: "application/json", ...authHeader() },
+        body: JSON.stringify(payload),
+      });
+      const ct = r.headers.get("content-type") || "";
+      if (!r.ok) {
+        const t = await r.text().catch(() => "");
+        if (r.status === 401) throw new Error("Unauthorized. Please sign in.");
+        throw new Error(`HTTP ${r.status} — ${t.slice(0,160)}`);
+      }
+      if (!ct.includes("application/json")) {
+        const t = await r.text().catch(() => "");
+        throw new Error(`Non JSON response (${ct}). Start: ${t.slice(0,160)}`);
+      }
+      const updated = await r.json();
+      setStory(updated);
+      setIsEditing(false);
+    } catch (e) {
+      setEditErr(String(e.message || e));
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function handleDeleteChapter(chapterId) {
     if (!isOwnerOrAdmin) return;
@@ -113,6 +213,37 @@ export const StoryWithChapters = () => {
     }
   }
 
+  async function handleDeleteStory() {
+    if (!isOwnerOrAdmin || !story) return;
+    const ok = window.confirm("Do you really want to delete this story? This will unpublish it and hide it from readers.");
+    if (!ok) return;
+
+    setDeletingStory(true);
+    setErr(null);
+    try {
+      const r = await fetch(`${API_BASE}/api/stories/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Accept: "application/json", ...authHeader() },
+        body: JSON.stringify({ status: "DELETED" }),
+      });
+      const ct = r.headers.get("content-type") || "";
+      if (!r.ok) {
+        const t = await r.text().catch(() => "");
+        throw new Error(`HTTP ${r.status} — ${t.slice(0,160)}`);
+      }
+      if (!ct.includes("application/json")) {
+        const t = await r.text().catch(() => "");
+        throw new Error(`Non JSON response (${ct}). Start: ${t.slice(0,160)}`);
+      }
+      await r.json();
+      navigate("/timeline");
+    } catch (e) {
+      setErr(String(e.message || e));
+    } finally {
+      setDeletingStory(false);
+    }
+  }
+
   const visibleChapters = chapters.filter(c => !c.deleted_at);
   const cover = story?.cover_url || examplecover;
 
@@ -135,40 +266,129 @@ export const StoryWithChapters = () => {
                 </div>
                 <div className="col-12 col-md-8">
                   <div className="card-body">
-                    <div className="d-flex align-items-start justify-content-between">
-                      <div>
-                        <h2 className="mb-1">{story.title}</h2>
-                      </div>
 
-                      {!isOwnerOrAdmin && (
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={openFirstReadableChapter}
-                        >
-                          Read
-                        </button>
-                      )}
-                    </div>
+                    {!isEditing ? (
+                      <>
+                        <div className="d-flex align-items-start justify-content-between">
+                          <div>
+                            <h2 className="mb-1">{story.title}</h2>
+                          </div>
 
-                    <p className="mt-3 mb-2">{story.synopsis || "Synopsis unavailable."}</p>
-                    <div className="small text-secondary">
-                      Last updated {story.updated_at_human || story.updated_at}
-                    </div>
+                          <div className="d-flex gap-2">
+                            {!isOwnerOrAdmin && (
+                              <button
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={openFirstReadableChapter}
+                              >
+                                Read
+                              </button>
+                            )}
+                            {isOwnerOrAdmin && (
+                              <>
+                                <button
+                                  className="btn btn-sm btn-outline-secondary"
+                                  onClick={beginEdit}
+                                >
+                                  Edit story
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={handleDeleteStory}
+                                  disabled={deletingStory}
+                                >
+                                  {deletingStory ? "Deleting…" : "Delete story"}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
 
-                    {Array.isArray(story.tags) && story.tags.length > 0 && (
-                      <div className="mt-2">
-                        {story.tags.map(t => {
-                          const tagId = t?.id ?? t?.slug ?? String(t);
-                          const tagName = t?.name ?? String(t);
-                          const tagSlug = t?.slug ?? encodeURIComponent(String(t));
-                          return (
-                            <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 badge text-bg-light">
-                              {tagName}
-                            </Link>
-                          );
-                        })}
-                      </div>
+                        <p className="mt-3 mb-2">{story.synopsis || "Synopsis unavailable."}</p>
+                        <div className="small text-secondary">
+                          Last updated {story.updated_at_human || story.updated_at}
+                        </div>
+
+                        {Array.isArray(story.tags) && story.tags.length > 0 && (
+                          <div className="mt-2">
+                            {story.tags.map(t => {
+                              const tagId = t?.id ?? t?.slug ?? String(t);
+                              const tagName = t?.name ?? String(t);
+                              const tagSlug = t?.slug ?? encodeURIComponent(String(t));
+                              return (
+                                <Link key={tagId} to={`/tag/${tagSlug}`} className="me-2 badge text-bg-light">
+                                  {tagName}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <form onSubmit={saveEdit}>
+                        <h5 className="mb-3">Edit story</h5>
+                        {editErr && <div className="alert alert-danger py-2">{editErr}</div>}
+
+                        <div className="mb-3">
+                          <label className="form-label">Title</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            required
+                          />
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="form-label">Synopsis</label>
+                          <textarea
+                            className="form-control"
+                            rows={4}
+                            value={editSynopsis}
+                            onChange={(e) => setEditSynopsis(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="row g-3">
+                          <div className="col-12 col-md-6">
+                            <label className="form-label">Status</label>
+                            <select
+                              className="form-select"
+                              value={editStatus}
+                              onChange={(e) => setEditStatus(e.target.value === "PUBLISHED" ? "PUBLISHED" : "DRAFT")}
+                            >
+                              <option value="DRAFT">Draft</option>
+                              <option value="PUBLISHED">Published</option>
+                            </select>
+                          </div>
+
+                          <div className="col-12 col-md-6">
+                            <label className="form-label">Category</label>
+                            <select
+                              className="form-select"
+                              value={editCategoryId}
+                              onChange={(e) => setEditCategoryId(e.target.value)}
+                              disabled={loadingCats}
+                            >
+                              <option value="">No category</option>
+                              {categories.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="d-flex gap-2 mt-3">
+                          <button className="btn btn-primary btn-sm" type="submit" disabled={savingEdit}>
+                            {savingEdit ? "Saving…" : "Save changes"}
+                          </button>
+                          <button className="btn btn-outline-secondary btn-sm" type="button" onClick={cancelEdit} disabled={savingEdit}>
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
                     )}
+
                   </div>
                 </div>
               </div>
