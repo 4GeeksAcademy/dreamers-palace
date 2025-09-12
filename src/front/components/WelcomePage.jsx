@@ -10,7 +10,7 @@ export const WelcomePage = () => {
 
         </div>
         <div className="content d-flex justify-content-center text-white">
-            <h3>Hola, bienvenidos a Dreamers Palace Donde las historias cobran vida</h3>
+            <h3>Hello, welcome to Dreamers Palace — where stories come to life</h3>
 
 
         </div>
@@ -45,63 +45,63 @@ export const WelcomePage = () => {
         <div className="d-flex">
             <div className="p-2 flex-fill">
 
-            <div className="row g-0">
-            <div className="col-12 col-md-">
+                <div className="row g-0">
+                    <div className="col-12 col-md-">
 
-                <img
-                    src={pen}
-                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+                        <img
+                            src={pen}
+                            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
 
-                />
-            </div>
-            </div>
-                <h2>Abre tu mente </h2>
-               
+                        />
+                    </div>
+                </div>
+                <h2>Open your mind </h2>
+
                 <Link to="/story/new" className="btn btn-primary btn-lg">
-                 Empezar a escribir
+                    Start writing
                 </Link>
-               
+
             </div>
             <div className="p-2 flex-fill">
-               <div className="row g-0">
-            <div className="col-12 col-md-">
+                <div className="row g-0">
+                    <div className="col-12 col-md-">
 
-                <img
-                    src={leer}
-                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+                        <img
+                            src={leer}
+                            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
 
-                />
-            </div>
-            </div>
-                <h2>Historias</h2>
-                <button type="button" className="btn btn-primary  btn-lg">Comenzar a leer </button>
+                        />
+                    </div>
+                </div>
+                <h2>Stories</h2>
+                <button type="button" className="btn btn-primary  btn-lg">Start reading </button>
             </div>
 
             <div className="p-2 flex-fill">
 
                 <div className="row g-0">
-            <div className="col-12 col-md-">
+                    <div className="col-12 col-md-">
 
-                <img
-                    src={apple}
-                    className="img-fluid rounded-start w-100 h-100 object-fit-cover"
+                        <img
+                            src={apple}
+                            className="img-fluid rounded-start w-100 h-100 object-fit-cover"
 
-                />
-            </div>
-            </div>
+                        />
+                    </div>
+                </div>
                 <h2>Login</h2>
-               
-                <Link to="/login" className="btn btn-primary btn-lg">
-                      crea tu perfil
 
-                 </Link>
-                   
-               
+                <Link to="/login" className="btn btn-primary btn-lg">
+                    Create your profile
+
+                </Link>
+
+
             </div>
         </div>
 
 
-          
+
         <div className="demo-content">
             <div className="container-fluid" style={{ paddingTop: "20px" }}>
                 <div className="row">
@@ -111,7 +111,7 @@ export const WelcomePage = () => {
                         <div className="jumbotron-glass">
                             <div className="book-decoration"></div>
                             <div className="container">
-                               
+
                             </div>
                         </div>
                     </div>
@@ -123,9 +123,9 @@ export const WelcomePage = () => {
                 <div className="row">
                     <div className="col-12">
                         <div className="secondary-section p-5 text-center">
-                            <h2 className="display-5 section-title mb-3">Explora Nuestro Universo Literario</h2>
+                            <h2 className="display-5 section-title mb-3">Explore Our Literary Universe</h2>
                             <p className="fs-4 section-subtitle mb-5">
-                                Sumérgete en historias que transforman perspectivas
+                                Immerse yourself in stories that transform perspectives
                             </p>
                             <div className="row g-4">
                                 <div className="col-md-4">
@@ -136,8 +136,9 @@ export const WelcomePage = () => {
                                                     <path d="M8.5 2.687c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z" />
                                                 </svg>
                                             </div>
-                                            <h5 className="card-title">Reseñas Detalladas</h5>
-                                            <p className="card-text">Análisis profundos y honestos de las últimas novedades literarias y clásicos atemporales.</p>
+                                            <h5 className="card-title">In-Depth Reviews</h5>
+                                            <p className="card-text">Deep, honest analyses of the latest literary releases
+                                                and timeless classics.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -149,8 +150,9 @@ export const WelcomePage = () => {
                                                     <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
                                                 </svg>
                                             </div>
-                                            <h5 className="card-title">Recomendaciones</h5>
-                                            <p className="card-text">Sugerencias personalizadas basadas en géneros, estados de ánimo y preferencias lectoras.</p>
+                                            <h5 className="card-title">Recommendations</h5>
+                                            <p className="card-text">Personalized suggestions based on genres, moods, and
+                                                reading preferences.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -163,8 +165,9 @@ export const WelcomePage = () => {
                                                     <path d="M8 5.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132Z" />
                                                 </svg>
                                             </div>
-                                            <h5 className="card-title">Comunidad Lectora</h5>
-                                            <p className="card-text">Conecta con otros apasionados de la literatura y comparte tus experiencias de lectura.</p>
+                                            <h5 className="card-title">Reader Community</h5>
+                                            <p className="card-text">Connect with fellow literature lovers and share your
+                                                reading experiences.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -173,7 +176,7 @@ export const WelcomePage = () => {
                             <div className="row mt-5">
                                 <div className="col-12">
                                     <div className="quote-section p-4">
-                                        <h4 className="section-title mb-3">Cita del Día</h4>
+                                        <h4 className="section-title mb-3">Quote of the Day</h4>
                                         <blockquote className="blockquote text-center mb-0">
                                             <p className="mb-3" style={{ fontFamily: "Crimson Text, serif", fontStyle: "italic", fontSize: "1.2rem", color: "#000000" }}>
                                                 "Los libros son espejos: solo se ve en ellos lo que uno ya lleva dentro."

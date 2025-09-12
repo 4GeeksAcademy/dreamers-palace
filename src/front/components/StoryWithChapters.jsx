@@ -45,7 +45,6 @@ export const StoryWithChapters = () => {
   const [err, setErr] = useState(null);
   const [deleting, setDeleting] = useState(new Set());
 
-  // ---- Edición de historia ----
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editSynopsis, setEditSynopsis] = useState("");
@@ -55,7 +54,6 @@ export const StoryWithChapters = () => {
   const [savingEdit, setSavingEdit] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCats, setLoadingCats] = useState(false);
-  // -----------------------------
   const [deletingStory, setDeletingStory] = useState(false);
 
   const isOwnerOrAdmin = !!(me && story && (me.id === story.author_id || me.user_role === "ADMIN"));
