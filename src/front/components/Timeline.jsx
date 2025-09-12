@@ -204,7 +204,7 @@ export const Timeline = () => {
     <div>
       <main className="container-fluid">
         <div className="row g-3 mt-3">
-          <aside className="col-12 col-md-3 col-lg-2 p-3 rounded-3 bg-white">
+          <aside className="col-12 col-md-3 col-lg-2 p-3 rounded-3 bg-white mb-3 mb-md-0">
             <div className="card my-3 sidebar-card">
               <div className="card-body">
                 <h5 className="card-title">Recently Viewed</h5>

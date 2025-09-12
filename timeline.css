@@ -14,7 +14,7 @@ body {
     background-color: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        }
+       
 }
 .sidebar-surface {
   background-color: rgba(255, 255, 255, 0.15);
@@ -22,12 +22,46 @@ body {
 .sidebar-card {
   width: 100%;
 }
-@media (min-width: 768px) {
+
+@media (max-width: 767.98px) {
   .sidebar-card {
-    width: 18rem;
+    margin-bottom: 1rem;
   }
+}
+
+img,
+.card-img,
+.card-img-top {
+  max-width: 100%;
+  height: auto;
+}
+
+.card {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.row {
+  flex-wrap: wrap;
 }
 
 main {
   padding-bottom: 5rem;
+}
+
+.dropdown-menu {
+  position: absolute;
+  z-index: 1100 !important;
+
+.navbar, .navbar .container-fluid {
+  position: relative;
+  z-index: 1100;
+}
+
+form input[type="search"], form .input-group {
+  position: relative;
+  z-index: 1;
+}
+
 }

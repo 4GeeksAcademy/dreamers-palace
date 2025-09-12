@@ -129,128 +129,128 @@ export const StoryCreation = () => {
     }
   };
 
-  return (
+return (
+  <div className="container-xxl my-4">
+    <div className="row g-4">
 
-    <div className="container-xxl my-4">
-      
-      <div>
-                  <label htmlFor="exampleFormControlTextarea1" className="form-label">
-                    Insert Image
-                  </label>
-                  <input type="file" onChange={ evt => setImage(evt.target.files[0])} />
-                    {
-                      image &&
-                      <img src={URL.createObjectURL(image)} alt="" style={{ maxHeight: '250px' , maxWidth: '250px' }} />
-                    }
-                    {
-                      image &&
-                      <button onClick={() =>setImage(null)}>Clear Image </button>
-                    }
-                    {
-                      image &&
-                      <button onClick={(evt) => uploadImageToCloudinary(evt)}>
-                        Upload Image
-                      </button>
-                    }
-                </div>
+      <div className="col-12 col-lg-4">
+        <div className="card shadow-sm h-100">
+          <div className="card-body">
+            <label htmlFor="exampleFormControlTextarea1" className="form-label">
+              Insert Image
+            </label>
+            <input type="file" onChange={evt => setImage(evt.target.files[0])} className="form-control mb-3" />
+            {image && (
+              <>
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt=""
+                  style={{ maxHeight: '250px', maxWidth: '100%', display: 'block', marginBottom: '10px' }}
+                />
+                <button className="btn btn-outline-secondary btn-sm me-2" onClick={() => setImage(null)}>
+                  Clear Image
+                </button>
+                <button className="btn btn-outline-primary btn-sm" onClick={(evt) => uploadImageToCloudinary(evt)}>
+                  Upload Image
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <form onSubmit={onSubmit}>
-        <div className="row g-3">
-          <div className="col-12 col-lg-8">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                {err && <div className="alert alert-danger mb-3">{err}</div>}
-                <div className="row g-3 align-items-center">
-                  <div className="col-12 col-md-6">
-                    <label className="form-label">Story title</label>
-                    <input
-                      type="text"
-                      className="form-control form-control-lg"
-                      placeholder="Give your story a title…"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-12 col-md-3">
-                    <label className="form-label">Category</label>
-                    <select
-                      className="form-select"
-                      value={categoryId}
-                      onChange={(e) => setCategoryId(e.target.value)}
-                    >
-                      <option value=""> None </option>
-                      {categories.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-12 col-md-3">
-                    <label className="form-label">Visibility</label>
-                    <select
-                      className="form-select"
-                      value={visibility}
-                      onChange={(e) => setVisibility(e.target.value === "published" ? "published" : "draft")}
-                    >
-                      <option value="published">Public</option>
-                      <option value="draft">Private (Draft)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mt-3">
-                  <label className="form-label">Synopsis</label>
-                  <textarea
-                    className="form-control"
-                    rows="4"
-                    placeholder="A short summary… (máx 200)"
-                    value={synopsis}
-                    onChange={(e) => setSynopsis(e.target.value)}
-                    maxLength={200}
-                    required
-                  />
-                  <div className="form-text">{synopsis.length}/200</div>
-                </div>
-
-                <div className="mt-3">
-                  <label className="form-label">Tags</label>
+      <div className="col-12 col-lg-8">
+        <form onSubmit={onSubmit}>
+          <div className="card shadow-sm">
+            <div className="card-body">
+              {err && <div className="alert alert-danger mb-3">{err}</div>}
+              <div className="row g-3 align-items-center">
+                <div className="col-12 col-md-6">
+                  <label className="form-label">Story title</label>
                   <input
                     type="text"
-                    className="form-control"
-                    placeholder="e.g. fantasy, medieval, dragons"
-                    value={tagsInput}
-                    onChange={(e) => setTagsInput(e.target.value)}
+                    className="form-control form-control-lg"
+                    placeholder="Give your story a title…"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
                   />
-                  <div className="form-text">
-                    Space tags with commas Ex: <em>fantasy, medieval, dragons</em>
-                  </div>
                 </div>
 
+                <div className="col-12 col-md-3">
+                  <label className="form-label">Category</label>
+                  <select
+                    className="form-select"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                  >
+                    <option value=""> None </option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-12 col-md-3">
+                  <label className="form-label">Visibility</label>
+                  <select
+                    className="form-select"
+                    value={visibility}
+                    onChange={(e) =>
+                      setVisibility(e.target.value === "published" ? "published" : "draft")
+                    }
+                  >
+                    <option value="published">Public</option>
+                    <option value="draft">Private (Draft)</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="col-12 col-lg-4 right-rail">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                <div className="d-grid">
-                  <button className="btn btn-primary" type="submit" disabled={submitting}>
-                    {submitting ? "Creando…" : "Crear historia"}
-                  </button>
+              <div className="mt-3">
+                <label className="form-label">Synopsis</label>
+                <textarea
+                  className="form-control"
+                  rows="4"
+                  placeholder="A short summary… (máx 200)"
+                  value={synopsis}
+                  onChange={(e) => setSynopsis(e.target.value)}
+                  maxLength={200}
+                  required
+                />
+                <div className="form-text">{synopsis.length}/200</div>
+              </div>
+
+              <div className="mt-3">
+                <label className="form-label">Tags</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. fantasy, medieval, dragons"
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                />
+                <div className="form-text">
+                  Space tags with commas Ex: <em>fantasy, medieval, dragons</em>
                 </div>
+              </div>
+
+              <div className="d-grid mt-4">
+                <button className="btn btn-primary" type="submit" disabled={submitting}>
+                  {submitting ? "Creando…" : "Crear historia"}
+                </button>
                 <div className="form-text mt-2">
                   You can choose to publish the story or keep it as a draft.
                 </div>
               </div>
             </div>
           </div>
+        </form>
+      </div>
 
-        </div>
-      </form>
     </div>
-  );
-};
+  </div>
+
+);
+}
