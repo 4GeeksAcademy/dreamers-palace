@@ -1,4 +1,4 @@
-import "/workspaces/dreamers-palace/timeline.css"
+import "../../../timeline.css"
 
 export const Footer = () => (
 	<footer className="py-3 mt-auto glass" style={{fontSize: "20px"}}>
