@@ -2,15 +2,16 @@ import { Link } from "react-router-dom";
 import apple from "./../assets/img/apple.jpg";
 import pen from "./../assets/img/pen.jpg";
 import leer from "./../assets/img/book-leer.jpg";
+import logo from "./../assets/img/Logotipo Color.png";
 export const WelcomePage = () => {
     return (<>
 
         <div className="content d-flex justify-content-center my-4">
-            <img src="Logotipo Color.png" alt="Dreamers Palace" height="140" />
+            <img src={logo} alt="Dreamers Palace" height="120px" />
 
         </div>
         <div className="content d-flex justify-content-center text-white">
-            <h3>Hello, welcome to Dreamers Palace — where stories come to life</h3>
+            <h3>Hello, welcome to Dreamers Palace, where stories come to life</h3>
 
 
         </div>
@@ -57,7 +58,7 @@ export const WelcomePage = () => {
                 </div>
                 <h2>Open your mind </h2>
 
-                <Link to="/story/new" className="btn btn-primary btn-lg">
+                <Link to="/login" className="btn btn-primary btn-lg">
                     Start writing
                 </Link>
 
@@ -74,7 +75,9 @@ export const WelcomePage = () => {
                     </div>
                 </div>
                 <h2>Stories</h2>
-                <button type="button" className="btn btn-primary  btn-lg">Start reading </button>
+                <Link to="/login" className="btn btn-primary btn-lg">
+                    Start reading
+                </Link>
             </div>
 
             <div className="p-2 flex-fill">
@@ -93,21 +96,14 @@ export const WelcomePage = () => {
 
                 <Link to="/login" className="btn btn-primary btn-lg">
                     Create your profile
-
                 </Link>
-
-
             </div>
         </div>
-
-
 
         <div className="demo-content">
             <div className="container-fluid" style={{ paddingTop: "20px" }}>
                 <div className="row">
                     <div className="col-12">
-
-
                         <div className="jumbotron-glass">
                             <div className="book-decoration"></div>
                             <div className="container">
@@ -117,7 +113,6 @@ export const WelcomePage = () => {
                     </div>
                 </div>
             </div>
-
 
             <div className="container-fluid">
                 <div className="row">
