@@ -103,7 +103,6 @@ return (
                   </div>
 
                   <div className="mb-3 d-flex flex-column">
-                    <Link to="/recovery" className="mb-2">¿Forgot your Password?</Link>
                     <Link to="/register">¿You don't have an Entry Permit? Register</Link>
                   </div>
 
